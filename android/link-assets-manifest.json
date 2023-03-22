@@ -1,0 +1,17 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assets/typography/fonts/extralbold.ttf",
+      "sha1": "0aa6ee65e0b05ad43b8fcfb8cb9456b79d44b481"
+    },
+    {
+      "path": "src/assets/typography/fonts/medium.ttf",
+      "sha1": "0bd0c4d7a8015630e944ce52199060ab58654905"
+    },
+    {
+      "path": "src/assets/typography/fonts/regular.ttf",
+      "sha1": "6ed141527b7a670cfb2cde638eda94fa4c4a83e4"
+    }
+  ]
+}
