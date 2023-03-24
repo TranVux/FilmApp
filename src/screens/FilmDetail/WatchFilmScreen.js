@@ -15,11 +15,13 @@ import {IconDownload, IconShare, IconView} from '../../assets/svgs';
 import ButtonVerticalIcon from '../../components/ButtonVerticalIcon';
 import {FILM_DATA} from '../../assets/data/FilmData';
 import Film from '../../components/Film';
+import YoutubePlayer from '../../components/YoutubePlayer';
 
 const WatchFilmScreen = ({navigation}) => {
   return (
     <SafeAreaView style={{backgroundColor: Colors.primary, flex: 1}}>
-      <VideoPlayer navigation={navigation} />
+      {/* <VideoPlayer navigation={navigation} /> */}
+      <YoutubePlayer />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{flexGrow: 1, backgroundColor: Colors.primary}}>
@@ -138,7 +140,7 @@ const WatchFilmScreen = ({navigation}) => {
                 </Pressable>
               </View>
             </ScrollView>
-            <ScrollView horizontal>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View style={styles.relativeFilmContainer}>
                 <Pressable style={styles.relativeFilmItem}>
                   <Text style={[Medium, {fontSize: 10}]}>TV</Text>
@@ -240,7 +242,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    paddingHorizontal: 15,
+    // paddingHorizontal: 15,
     marginTop: 15,
   },
   filmContainerStyle: {

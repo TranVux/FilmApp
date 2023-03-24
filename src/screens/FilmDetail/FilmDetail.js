@@ -7,6 +7,7 @@ import {IconBack, IconHeart, IconPlayOutlineSmall} from '../../assets/svgs';
 import {Heading, SubHeadingRegular, TextButton} from '../../assets/typography';
 import {Button} from '@rneui/themed';
 import VideoPlayer from '../../components/VideoPlayer';
+import YoutubePlayer from '../../components/YoutubePlayer';
 
 const FilmDetail = ({navigation, data}) => {
   return (
@@ -80,7 +81,8 @@ const FilmDetail = ({navigation, data}) => {
         {/* Video player container */}
         <View style={{paddingHorizontal: 15, marginTop: 25, flex: 1}}>
           <Text style={[Heading]}>Trailer</Text>
-          <VideoPlayer preview style={styles.videoPlayer} />
+          {/* <VideoPlayer preview style={styles.videoPlayer} /> */}
+          <YoutubePlayer preventFullScreen={true} />
         </View>
       </View>
     </ScrollView>
