@@ -14,8 +14,6 @@ import ButtonVerticalIcon from '../../components/ButtonVerticalIcon';
 import Film from '../../components/Film';
 import YoutubePlayer from '../../components/YoutubePlayer';
 import AxiosInstance from '../../utils/AxiosInstance';
-import {FlatGrid} from 'react-native-super-grid';
-import {FlatList} from 'react-native-gesture-handler';
 
 const WatchFilmScreen = ({navigation, route}) => {
   const {data, episodeIndex} = route.params;
