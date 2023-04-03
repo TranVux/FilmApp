@@ -1,21 +1,89 @@
 import {FlatList, Pressable, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
-import {SafeAreaView} from 'react-native-safe-area-context';
 import {Colors} from '../../assets/colors';
 import {IconNotify, IconSetting, Logo} from '../../assets/svgs';
 import {Heading} from '../../assets/typography';
 import TrendingMovie from '../../components/TrendingMovie';
-import {CHIP_DATA, DATA, FILM_DATA} from '../../assets/data/FilmData';
 
 import {Chip} from '@rneui/themed';
 import {ScrollView} from 'react-native';
 import Film from '../../components/Film';
 
-const HomeScreen = ({navigation}) => {
-  const [categorySelected, setCategorySelected] = React.useState(0);
+import AxiosInstance from '../../utils/AxiosInstance';
+import {RefreshControl} from 'react-native-gesture-handler';
 
-  const handleSelectedCategory = index => {
-    setCategorySelected(index);
+const HomeScreen = ({navigation}) => {
+  const [categorySelected, setCategorySelected] = React.useState({
+    index: 0,
+    data: {},
+  });
+  const [listFilmCategory, setListFilmCategory] = React.useState([]);
+  const [listCategory, setListCategory] = React.useState([]);
+  const [trendingMovieList, setTrendingMovieList] = React.useState([]);
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  const handelGetCategory = async () => {
+    try {
+      const _listCategory = await AxiosInstance().get('/categories');
+      _listCategory.data.splice(0, 0, {_id: '25546484611311684', name: 'All'});
+
+      setListCategory(_listCategory.data);
+      handleSelectedCategory(0, _listCategory.data[0]);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleGetTrendingMovie = async () => {
+    try {
+      const _listTrendingMovie = await AxiosInstance().get('/film/trending');
+      setTrendingMovieList(_listTrendingMovie.data);
+      // console.log(_listTrendingMovie.data);
+    } catch (error) {
+      console.log(error);
+    }
+
+    //handle swipe to refresh
+    setRefreshing(false);
+  };
+
+  const handleGetFilmByCategory = async () => {
+    try {
+      let list_categories = [];
+      if (categorySelected.data.name === 'All') {
+        list_categories = listCategory.map(item => item.name);
+      } else {
+        list_categories.push(categorySelected.data.name);
+      }
+      // console.log(list_categories);
+
+      const _listFilmCategory = await AxiosInstance().post('/film/categories', {
+        list_categories,
+      });
+      setListFilmCategory(_listFilmCategory.data);
+    } catch (error) {
+      console.log(error);
+    }
+
+    //handle swipe to refresh
+    setRefreshing(false);
+  };
+
+  React.useEffect(() => {
+    //get list category
+    handelGetCategory();
+
+    //get list trending film
+    handleGetTrendingMovie();
+  }, []);
+
+  React.useEffect(() => {
+    //get list film by category
+    handleGetFilmByCategory();
+  }, [categorySelected]);
+
+  const handleSelectedCategory = (index, data) => {
+    setCategorySelected(prev => ({...prev, index, data}));
   };
 
   const renderItemTrending = ({item}) => {
@@ -24,10 +92,17 @@ const HomeScreen = ({navigation}) => {
         data={item}
         key={item._id}
         onPress={() => {
-          navigation.navigate('FilmDetail');
+          navigation.navigate('FilmDetail', {data: item});
         }}
       />
     );
+  };
+
+  //handle swipe to refresh
+  const onRefresh = () => {
+    setRefreshing(true);
+    handleGetTrendingMovie();
+    handelGetCategory();
   };
 
   return (
@@ -51,6 +126,9 @@ const HomeScreen = ({navigation}) => {
         </Pressable>
       </View>
       <ScrollView
+        refreshControl={
+          <RefreshControl onRefresh={onRefresh} refreshing={refreshing} />
+        }
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{flexGrow: 1, paddingBottom: 70}}>
         <View style={styles.sectionContainer}>
@@ -62,19 +140,18 @@ const HomeScreen = ({navigation}) => {
               showsVerticalScrollIndicator={false}
               showsHorizontalScrollIndicator={false}
               horizontal={true}
-              data={DATA}
+              data={trendingMovieList}
               renderItem={renderItemTrending}
               keyExtractor={item => item._id}
               ItemSeparatorComponent={() => <View style={{width: 15}} />}
             />
-            {/* <TrendingMovie data={DATA[0]} /> */}
           </View>
           <Text style={[Heading, {marginTop: 30}]}>Categories</Text>
           <ScrollView
             style={styles.categoriesContainer}
             horizontal={true}
             showsHorizontalScrollIndicator={false}>
-            {CHIP_DATA.map((item, index) => {
+            {listCategory.map((item, index) => {
               return (
                 <Chip
                   containerStyle={{
@@ -82,7 +159,7 @@ const HomeScreen = ({navigation}) => {
                   }}
                   touchSoundDisabled={true}
                   onPress={() => {
-                    handleSelectedCategory(index);
+                    handleSelectedCategory(index, item);
                   }}
                   key={item._id}
                   title={item.name}
@@ -90,7 +167,7 @@ const HomeScreen = ({navigation}) => {
                     styles.buttonChipTitle,
                     {
                       backgroundColor:
-                        categorySelected === index
+                        categorySelected.index === index
                           ? Colors.red
                           : Colors.secondary,
                     },
@@ -103,12 +180,15 @@ const HomeScreen = ({navigation}) => {
           {/* List film */}
 
           <ScrollView showsHorizontalScrollIndicator={false} horizontal>
-            {FILM_DATA.map((item, index) => {
+            {listFilmCategory.map((item, index) => {
               return (
                 <Film
                   data={item}
                   key={item._id}
                   style={styles.filmContainerStyle}
+                  onPress={() => {
+                    navigation.navigate('FilmDetail', {data: item});
+                  }}
                 />
               );
             })}

@@ -1,7 +1,8 @@
 import axios from 'axios';
 const AxiosInstance = (contentType = 'application/json') => {
   const axiosInstance = axios.create({
-    baseURL: 'https://lab-express-server.vercel.app/api/',
+    baseURL: 'https://server-film-app.vercel.app/api',
+    // baseURL: 'http://192.168.1.4:3000/api',
   });
   axiosInstance.interceptors.request.use(
     async config => {
@@ -9,6 +10,7 @@ const AxiosInstance = (contentType = 'application/json') => {
         Accept: 'application/json',
         'Content-Type': contentType,
       };
+      // console.log(config);
       return config;
     },
     err => Promise.reject(err),

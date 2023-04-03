@@ -1,5 +1,4 @@
 import {
-  Dimensions,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -8,28 +7,65 @@ import {
   View,
 } from 'react-native';
 import React from 'react';
-import VideoPlayer from '../../components/VideoPlayer';
 import {Colors} from '../../assets/colors';
 import {Heading, Medium, SubHeading, SubSmall} from '../../assets/typography';
 import {IconDownload, IconShare, IconView} from '../../assets/svgs';
 import ButtonVerticalIcon from '../../components/ButtonVerticalIcon';
-import {FILM_DATA} from '../../assets/data/FilmData';
 import Film from '../../components/Film';
 import YoutubePlayer from '../../components/YoutubePlayer';
+import AxiosInstance from '../../utils/AxiosInstance';
+import {FlatGrid} from 'react-native-super-grid';
+import {FlatList} from 'react-native-gesture-handler';
 
-const WatchFilmScreen = ({navigation}) => {
+const WatchFilmScreen = ({navigation, route}) => {
+  const {data, episodeIndex} = route.params;
+  const [currentEpisodeIndex, setCurrentEpisodeIndex] =
+    React.useState(episodeIndex);
+
+  const [listFilmSuggest, setListFilmSuggest] = React.useState([]);
+
+  const handleGetSuggestFilm = async () => {
+    const list_categories = data.list_category.map(item => {
+      return item.name;
+    });
+
+    console.log(list_categories);
+    try {
+      const _listFilmSuggest = await AxiosInstance().post('/film/categories', {
+        list_categories,
+      });
+      console.log(_listFilmSuggest);
+
+      setListFilmSuggest(_listFilmSuggest.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const renderSuggestFilm = ({item}) => {
+    return (
+      <Film data={item} key={item._id} style={styles.filmContainerStyle} />
+    );
+  };
+
+  React.useEffect(() => {
+    //handle get suggest film for user
+    handleGetSuggestFilm();
+  }, []);
+
   return (
     <SafeAreaView style={{backgroundColor: Colors.primary, flex: 1}}>
-      {/* <VideoPlayer navigation={navigation} /> */}
-      <YoutubePlayer />
+      <YoutubePlayer
+        videoID={data.list_episode[currentEpisodeIndex].video_id}
+      />
+
       <ScrollView
+        nestedScrollEnabled={true}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{flexGrow: 1, backgroundColor: Colors.primary}}>
         <View style={styles.contentContainer}>
           <View style={{marginTop: 20}}>
-            <Text style={[SubHeading]}>
-              Sword Art Online the Movie: Progressive Scherzo of Deep Night
-            </Text>
+            <Text style={[SubHeading]}>{data.name}</Text>
             <View
               style={{
                 flexDirection: 'row',
@@ -37,7 +73,9 @@ const WatchFilmScreen = ({navigation}) => {
                 marginTop: 8,
               }}>
               <IconView />
-              <Text style={[SubSmall, {marginStart: 3}]}>152K</Text>
+              <Text style={[SubSmall, {marginStart: 3}]}>
+                {data.views ? data.views : '0'}
+              </Text>
             </View>
           </View>
 
@@ -45,7 +83,7 @@ const WatchFilmScreen = ({navigation}) => {
           <View style={styles.actionContainer}>
             <ButtonVerticalIcon
               buttonLikeToggle={true}
-              title="152K"
+              title={data.like}
               initTintColorToggle={'#fff'}
               colorToggle={Colors.red}
             />
@@ -68,97 +106,39 @@ const WatchFilmScreen = ({navigation}) => {
             <Text style={[Heading]}>Episode</Text>
             <ScrollView
               horizontal={true}
+              nestedScrollEnabled={true}
               showsHorizontalScrollIndicator={false}>
               <View style={styles.episodeContainer}>
-                <Pressable
-                  style={[styles.episode, {backgroundColor: Colors.secondary}]}>
-                  <Text style={Medium}>1</Text>
-                </Pressable>
-
-                <Pressable
-                  style={[
-                    styles.episode,
-                    {backgroundColor: '#252C571A', borderWidth: 1},
-                  ]}>
-                  <Text style={Medium}>2</Text>
-                </Pressable>
-                <Pressable
-                  style={[
-                    styles.episode,
-                    {backgroundColor: '#252C571A', borderWidth: 1},
-                  ]}>
-                  <Text style={Medium}>2</Text>
-                </Pressable>
-                <Pressable
-                  style={[
-                    styles.episode,
-                    {backgroundColor: '#252C571A', borderWidth: 1},
-                  ]}>
-                  <Text style={Medium}>2</Text>
-                </Pressable>
-                <Pressable
-                  style={[
-                    styles.episode,
-                    {backgroundColor: '#252C571A', borderWidth: 1},
-                  ]}>
-                  <Text style={Medium}>2</Text>
-                </Pressable>
-                <Pressable
-                  style={[
-                    styles.episode,
-                    {backgroundColor: '#252C571A', borderWidth: 1},
-                  ]}>
-                  <Text style={Medium}>2</Text>
-                </Pressable>
-                <Pressable
-                  style={[
-                    styles.episode,
-                    {backgroundColor: '#252C571A', borderWidth: 1},
-                  ]}>
-                  <Text style={Medium}>2</Text>
-                </Pressable>
-                <Pressable
-                  style={[
-                    styles.episode,
-                    {backgroundColor: '#252C571A', borderWidth: 1},
-                  ]}>
-                  <Text style={Medium}>2</Text>
-                </Pressable>
-                <Pressable
-                  style={[
-                    styles.episode,
-                    {backgroundColor: '#252C571A', borderWidth: 1},
-                  ]}>
-                  <Text style={Medium}>2</Text>
-                </Pressable>
-                <Pressable
-                  style={[
-                    styles.episode,
-                    {backgroundColor: '#252C571A', borderWidth: 1},
-                  ]}>
-                  <Text style={Medium}>2</Text>
-                </Pressable>
+                {data.list_episode.map(item => (
+                  <Pressable
+                    key={item._id}
+                    style={[
+                      styles.episode,
+                      {backgroundColor: Colors.secondary},
+                    ]}>
+                    <Text style={Medium}>{item.index}</Text>
+                  </Pressable>
+                ))}
               </View>
             </ScrollView>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <ScrollView
+              horizontal
+              nestedScrollEnabled={true}
+              showsHorizontalScrollIndicator={false}>
               <View style={styles.relativeFilmContainer}>
-                <Pressable style={styles.relativeFilmItem}>
-                  <Text style={[Medium, {fontSize: 10}]}>TV</Text>
-                </Pressable>
-                <Pressable style={styles.relativeFilmItem}>
-                  <Text style={[Medium, {fontSize: 10}]}>TV</Text>
-                </Pressable>
-                <Pressable style={styles.relativeFilmItem}>
-                  <Text style={[Medium, {fontSize: 10}]}>TV</Text>
-                </Pressable>
-                <Pressable style={styles.relativeFilmItem}>
-                  <Text style={[Medium, {fontSize: 10}]}>TV</Text>
-                </Pressable>
-                <Pressable style={styles.relativeFilmItem}>
-                  <Text style={[Medium, {fontSize: 10}]}>
-                    Sword Art Online Progressive 1
-                  </Text>
-                </Pressable>
+                {data._id_collection.films.map(item => (
+                  <Pressable
+                    key={item._id}
+                    style={[
+                      styles.relativeFilmItem,
+                      {
+                        borderColor:
+                          item.name === data.name ? 'white' : Colors.secondary,
+                      },
+                    ]}>
+                    <Text style={[Medium, {fontSize: 10}]}>{item.name}</Text>
+                  </Pressable>
+                ))}
               </View>
             </ScrollView>
           </View>
@@ -167,7 +147,7 @@ const WatchFilmScreen = ({navigation}) => {
           <View style={styles.suggestContainer}>
             <Text style={[Heading]}>Suggest for you</Text>
             <View style={styles.filmContainer}>
-              {FILM_DATA.map((item, index) => {
+              {listFilmSuggest.map((item, index) => {
                 return (
                   <Film
                     data={item}
@@ -227,6 +207,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   relativeFilmItem: {
+    borderWidth: 0.5,
     height: 25,
     borderRadius: 3,
     backgroundColor: Colors.secondary,
@@ -242,7 +223,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    // paddingHorizontal: 15,
+    paddingHorizontal: 15,
     marginTop: 15,
   },
   filmContainerStyle: {

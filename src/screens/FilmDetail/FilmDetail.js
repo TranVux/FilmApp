@@ -6,10 +6,11 @@ import LinearGradient from 'react-native-linear-gradient';
 import {IconBack, IconHeart, IconPlayOutlineSmall} from '../../assets/svgs';
 import {Heading, SubHeadingRegular, TextButton} from '../../assets/typography';
 import {Button} from '@rneui/themed';
-import VideoPlayer from '../../components/VideoPlayer';
 import YoutubePlayer from '../../components/YoutubePlayer';
 
-const FilmDetail = ({navigation, data}) => {
+const FilmDetail = ({navigation, route}) => {
+  const {data} = route.params;
+
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
@@ -18,7 +19,7 @@ const FilmDetail = ({navigation, data}) => {
       <View style={{flex: 1, paddingBottom: 80}}>
         <FastImage
           source={{
-            uri: 'https://ecdn.game4v.com/g4v-content/uploads/2022/08/23111525/SAO-delay-1-game4v-1661228124-28.jpg',
+            uri: data.thumbnail.path,
           }}
           style={styles.thumbnailStyle}
           resizeMode={FastImage.resizeMode.cover}>
@@ -39,36 +40,24 @@ const FilmDetail = ({navigation, data}) => {
                 paddingHorizontal: 10,
                 justifyContent: 'space-between',
               }}>
-              <Text style={[Heading]}>Sword Art Online Progressive 2</Text>
+              <Text style={[Heading]}>{data.name}</Text>
               <Text style={[SubHeadingRegular, {color: '#FFFFFFB2'}]}>
-                Categories/Categories/Categories
+                {data.list_category.map((item, index, data) => {
+                  if (index >= data.length - 1) return item.name;
+                  return item.name.concat('/');
+                })}
               </Text>
               <ScrollView
                 nestedScrollEnabled={true}
                 style={{maxHeight: 170, marginTop: 10}}>
-                <Text style={[SubHeadingRegular]}>
-                  r adipiscing elit. Aenean lacus elit, facilisis quis nulla
-                  vitae, fringilla aliquet lectus. Pellentesque sed neque quis
-                  nibh lobortis mattis. Aliquam erat volutpat. Morbi vel blandit
-                  orci, quis feugiat enim. Aenean blandit eu ligula in laoreet.
-                  Sed et lorem vel mauris ultricies lobortis sed eget tellus.
-                  Maecenas vitae odio ut tortor faucibus venenatis a ac augue.
-                  Maecenas vitae odio ut tortor faucibus venenatis a ac augue.
-                  Maecenas vitae odio ut tortor faucibus venenatis a ac augue.
-                  Maecenas vitae odio ut tortor faucibus venenatis a ac augue.
-                  Maecenas vitae odio ut tortor faucibus venenatis a ac augue.
-                  Maecenas vitae odio ut tortor faucibus venenatis a ac augue.
-                  Maecenas vitae odio ut tortor faucibus venenatis a ac augue.
-                  Maecenas vitae odio ut tortor faucibus venenatis a ac augue.
-                  Morbi non tincidunt dui.
-                </Text>
+                <Text style={[SubHeadingRegular]}>{data.synopsis}</Text>
               </ScrollView>
             </View>
           </LinearGradient>
         </FastImage>
         <Button
           onPress={() => {
-            navigation.navigate('WatchFilmScreen');
+            navigation.navigate('WatchFilmScreen', {data, episodeIndex: 0});
           }}
           iconPosition="left"
           icon={<IconPlayOutlineSmall />}
@@ -82,7 +71,7 @@ const FilmDetail = ({navigation, data}) => {
         <View style={{paddingHorizontal: 15, marginTop: 25, flex: 1}}>
           <Text style={[Heading]}>Trailer</Text>
           {/* <VideoPlayer preview style={styles.videoPlayer} /> */}
-          <YoutubePlayer preventFullScreen={true} />
+          <YoutubePlayer preventFullScreen={true} videoID={data.trailer} />
         </View>
       </View>
     </ScrollView>

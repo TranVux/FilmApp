@@ -140,7 +140,7 @@ const VideoPlayer = ({preview, style, navigation, data}) => {
           style={styles.videoStyle}
           // source={{uri: 'https://www.w3schools.com/html/mov_bbb.mp4'}}
           source={{
-            uri: 'https://player.vimeo.com/progressive_redirect/playback/673786323/rendition/720p?loc=external&oauth2_token_id=1027659655&signature=f376cb2ae4853b5294197795734ea03145105511edf54eed9f201fcc85416609',
+            uri: 'https://p-def6.pcloud.com/cfZBBbWNlZewrh1rZWdDW7ZZrUoho7ZQ5ZZKIzZZJJtdeXZUzZIXZoJZhRZ44Zm5ZW7ZzFZoLZj4ZC4ZJHZR5ZrFZiajleQLmM28mAqmkLl4Kc8YQBEb7/0329.mp4',
           }}
           ref={videoPlayerRef}
           volume={100}

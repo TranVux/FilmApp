@@ -9,7 +9,8 @@ const StackHome = createStackNavigator();
 
 const HomeScreenNavigation = () => {
   return (
-    <StackHome.Navigator screenOptions={{headerShown: false}}>
+    <StackHome.Navigator
+      screenOptions={{presentation: 'transparentModal', headerShown: false}}>
       <StackHome.Screen component={HomeScreen} name="HomeScreen" />
       <StackHome.Screen component={FilmDetail} name="FilmDetail" />
     </StackHome.Navigator>

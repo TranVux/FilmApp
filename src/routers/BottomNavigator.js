@@ -24,6 +24,7 @@ const BottomNavigator = ({navigation}) => {
       screenOptions={({route}) => ({
         headerShown: false,
         tabBarShowLabel: false,
+        tabBarHideOnKeyboard: true,
         tabBarIcon: ({focused}) => {
           switch (route.name) {
             case 'HomeScreenNavigation':

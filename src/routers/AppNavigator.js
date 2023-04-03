@@ -10,6 +10,7 @@ import {useSelector} from 'react-redux';
 import LoginScreen from '../screens/LoginScreen/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen/RegisterScreen';
 import SplashScreen from '../screens/SplashScreen/SplashScreen';
+import WebViewScreen from '../screens/WebView/WebViewScreen';
 
 const AppStack = createStackNavigator();
 
@@ -36,8 +37,9 @@ const AppNavigator = () => {
   const isLogin = useSelector(state => state.isLogin);
   return (
     <NavigationContainer>
-      <AppStack.Navigator screenOptions={{headerShown: false}}>
-        {/* <AppStack.Screen component={WatchFilmScreen} name="WatchFilmScreen" /> */}
+      <AppStack.Navigator
+        screenOptions={{headerShown: false, presentation: 'transparentModal'}}>
+        {/* <AppStack.Screen component={WebViewScreen} name="WatchFilmScreen" /> */}
         <AppStack.Screen component={SplashScreen} name="SplashScreen" />
         <AppStack.Screen component={BottomNavigator} name="BottomNavigator" />
         {STACK_SCREEN.map(screen => {

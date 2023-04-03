@@ -1,6 +1,5 @@
 import {StyleSheet, Text, View} from 'react-native';
 import React from 'react';
-import {SafeAreaView} from 'react-native-safe-area-context';
 import FastImage from 'react-native-fast-image';
 import LinearGradient from 'react-native-linear-gradient';
 
@@ -11,10 +10,12 @@ import {Pressable} from 'react-native';
 const DEFAULT_FUNCTION = () => {};
 
 const TrendingMovie = ({data, onPress = DEFAULT_FUNCTION, navigation}) => {
+  // const
+  const _createdDate = new Date(data.createdDate).getFullYear();
   return (
     <Pressable style={styles.container} onPress={onPress}>
       <FastImage
-        source={{uri: data.image}}
+        source={{uri: data.background_medium.path}}
         style={{width: '100%', height: '100%'}}
         resizeMode={FastImage.resizeMode.cover}
       />
@@ -24,7 +25,7 @@ const TrendingMovie = ({data, onPress = DEFAULT_FUNCTION, navigation}) => {
         <Text style={[SubHeading]} numberOfLines={2}>
           {data.name}
         </Text>
-        <Text style={[SubHeadingRegular]}>2023</Text>
+        <Text style={[SubHeadingRegular]}>{_createdDate}</Text>
       </LinearGradient>
     </Pressable>
   );

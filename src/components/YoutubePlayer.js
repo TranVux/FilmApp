@@ -4,7 +4,7 @@ import YoutubePlayerIframe from 'react-native-youtube-iframe';
 import Orientation from 'react-native-orientation-locker';
 import {Colors} from '../assets/colors';
 
-const YoutubePlayer = ({data, preventFullScreen}) => {
+const YoutubePlayer = ({videoID, preventFullScreen}) => {
   const [fullScreen, setFullScreen] = React.useState(false);
 
   const handleOnFullChangeFullScreen = value => {
@@ -36,7 +36,7 @@ const YoutubePlayer = ({data, preventFullScreen}) => {
         onFullScreenChange={handleOnFullChangeFullScreen}
         height={300}
         play={false}
-        videoId={'84WIaK3bl_s'}
+        videoId={videoID}
       />
     </View>
   );

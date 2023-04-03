@@ -1,6 +1,5 @@
 import {StyleSheet, Text, View} from 'react-native';
 import React from 'react';
-import {SafeAreaView} from 'react-native-safe-area-context';
 import FastImage from 'react-native-fast-image';
 import {IconStar} from '../assets/svgs';
 import {Title, SubHeading, SubSmall} from '../assets/typography';
@@ -8,18 +7,34 @@ import {Pressable} from 'react-native';
 
 const DEFAULT_FUNCTION = () => {};
 
-const Film = ({data, style, onPress = DEFAULT_FUNCTION, textBox}) => {
+const Film = ({
+  data,
+  style,
+  onPress = DEFAULT_FUNCTION,
+  textBox,
+  index,
+  gap,
+  endIndex,
+}) => {
   return (
-    <Pressable style={[styles.container, {...style}]} onPress={onPress}>
+    <Pressable
+      style={[
+        styles.container,
+        {
+          marginEnd: !index ? 20 : index % 2 === 0 ? 0 : gap,
+        },
+        {...style},
+      ]}
+      onPress={onPress}>
       <FastImage
         source={{
-          uri: data?.image,
+          uri: data?.thumbnail.path,
         }}
         style={[styles.imageStyle, {}]}>
         {!textBox ? (
           <View style={styles.starContainer}>
             <IconStar width={12} height={12} />
-            <Text style={[SubHeading, {marginStart: 3}]}>{data?.star}</Text>
+            <Text style={[SubHeading, {marginStart: 3}]}>{data?.score}</Text>
           </View>
         ) : (
           <View style={styles.historyEpisode}>
