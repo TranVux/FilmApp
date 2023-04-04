@@ -14,6 +14,7 @@ import ButtonVerticalIcon from '../../components/ButtonVerticalIcon';
 import Film from '../../components/Film';
 import YoutubePlayer from '../../components/YoutubePlayer';
 import AxiosInstance from '../../utils/AxiosInstance';
+import {RefreshControl} from 'react-native-gesture-handler';
 
 const WatchFilmScreen = ({navigation, route}) => {
   const {data, episodeIndex} = route.params;
@@ -21,6 +22,7 @@ const WatchFilmScreen = ({navigation, route}) => {
     React.useState(episodeIndex);
 
   const [listFilmSuggest, setListFilmSuggest] = React.useState([]);
+  const [refreshing, setRefreshing] = React.useState(false);
 
   const handleGetSuggestFilm = async () => {
     const list_categories = data.list_category.map(item => {
@@ -40,10 +42,12 @@ const WatchFilmScreen = ({navigation, route}) => {
     }
   };
 
-  const renderSuggestFilm = ({item}) => {
-    return (
-      <Film data={item} key={item._id} style={styles.filmContainerStyle} />
-    );
+  const onChangeFilmEpisode = index => {
+    setCurrentEpisodeIndex(index);
+  };
+
+  const onRefresh = () => {
+    setRefreshing(false);
   };
 
   React.useEffect(() => {
@@ -60,10 +64,15 @@ const WatchFilmScreen = ({navigation, route}) => {
       <ScrollView
         nestedScrollEnabled={true}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{flexGrow: 1, backgroundColor: Colors.primary}}>
+        contentContainerStyle={{flexGrow: 1, backgroundColor: Colors.primary}}
+        refreshControl={
+          <RefreshControl onRefresh={onRefresh} refreshing={refreshing} />
+        }>
         <View style={styles.contentContainer}>
           <View style={{marginTop: 20}}>
-            <Text style={[SubHeading]}>{data.name}</Text>
+            <Text style={[SubHeading]}>
+              {data?.list_episode[currentEpisodeIndex].name}
+            </Text>
             <View
               style={{
                 flexDirection: 'row',
@@ -107,12 +116,21 @@ const WatchFilmScreen = ({navigation, route}) => {
               nestedScrollEnabled={true}
               showsHorizontalScrollIndicator={false}>
               <View style={styles.episodeContainer}>
-                {data.list_episode.map(item => (
+                {data?.list_episode?.map((item, index) => (
                   <Pressable
+                    onPress={() => {
+                      onChangeFilmEpisode(index);
+                    }}
                     key={item._id}
                     style={[
                       styles.episode,
-                      {backgroundColor: Colors.secondary},
+                      {
+                        backgroundColor: Colors.secondary,
+                        borderColor:
+                          currentEpisodeIndex === index
+                            ? 'white'
+                            : Colors.secondary,
+                      },
                     ]}>
                     <Text style={Medium}>{item.index}</Text>
                   </Pressable>
@@ -124,7 +142,7 @@ const WatchFilmScreen = ({navigation, route}) => {
               nestedScrollEnabled={true}
               showsHorizontalScrollIndicator={false}>
               <View style={styles.relativeFilmContainer}>
-                {data._id_collection.films.map(item => (
+                {data?._id_collection?.films?.map(item => (
                   <Pressable
                     key={item._id}
                     style={[
@@ -197,6 +215,7 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     marginEnd: 10,
     borderColor: Colors.secondary,
+    borderWidth: 0.5,
   },
   relativeFilmContainer: {
     flexDirection: 'row',

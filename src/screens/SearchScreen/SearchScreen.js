@@ -1,6 +1,10 @@
 import {Dimensions, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
-import {ScrollView, TextInput} from 'react-native-gesture-handler';
+import {
+  ScrollView,
+  TextInput,
+  RefreshControl,
+} from 'react-native-gesture-handler';
 import {Pressable} from 'react-native';
 import {
   IconNotify,
@@ -13,30 +17,90 @@ import {
 import {Colors} from '../../assets/colors';
 import {Heading, Regular17, SubHeading} from '../../assets/typography';
 import Carousel from 'react-native-anchor-carousel';
-import {FILM_DATA} from '../../assets/data/FilmData';
 import FastImage from 'react-native-fast-image';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Film from '../../components/Film';
+import AxiosInstance from '../../utils/AxiosInstance';
 
 const {width: WINDOW_WIDTH} = Dimensions.get('window');
 
 const SearchScreen = ({navigation}) => {
   const carousel = React.useRef(null);
-  const [currentFilmSelect, setCurrentFilmSelect] = React.useState(
-    FILM_DATA[0],
-  );
+  const [searchKeyWord, setSearchKeyWord] = React.useState('');
+  const [currentFilmSelect, setCurrentFilmSelect] = React.useState({});
+
+  const [listFilmNewest, setListFilmNewest] = React.useState([]);
+  const [listFilmSuggest, setListFilmSuggest] = React.useState([]);
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  const handleGetSuggestFilm = async () => {
+    try {
+      setRefreshing(true);
+      const _listFilmSuggest = await AxiosInstance().get('/film/trending');
+      console.log(_listFilmSuggest);
+
+      setListFilmSuggest(_listFilmSuggest.data);
+    } catch (error) {
+      console.log(error);
+    }
+    setRefreshing(false);
+  };
+
+  const handleGetFilmNewest = async () => {
+    try {
+      setRefreshing(true);
+      const res = await AxiosInstance().get('/film?_limit=10');
+      if (!res.error) {
+        // console.log(res.data[0]);
+
+        setListFilmNewest(res.data);
+        // setCurrentFilmSelect(listFilmNewest[0]);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    carousel.current.scrollToIndex(0);
+    setRefreshing(false);
+  };
+
+  //handle swipe to refresh
+  const onRefresh = () => {
+    //handle get suggest film for user
+    handleGetFilmNewest();
+
+    handleGetSuggestFilm();
+  };
+
+  React.useEffect(() => {
+    if (listFilmNewest.length > 0) {
+      setCurrentFilmSelect(listFilmNewest[0]);
+      console.log(listFilmNewest);
+    }
+  }, [listFilmNewest]);
+
+  React.useEffect(() => {
+    //handle get suggest film for user
+    handleGetFilmNewest();
+
+    handleGetSuggestFilm();
+  }, []);
+
+  const handleOnFilmItemClick = () => {
+    try {
+    } catch (error) {}
+  };
 
   const renderItemNewestFilm = ({item, index}) => {
-    const {image, star} = item;
-
+    const {thumbnail, score} = item;
+    // console.log(item);
     return (
       <Pressable
         style={{width: 180}}
         onPress={() => {
           carousel.current.scrollToIndex(index);
-          setCurrentFilmSelect(FILM_DATA[index]);
+          setCurrentFilmSelect(listFilmNewest[index]);
         }}>
-        <FastImage style={styles.itemFilm} source={{uri: image}} />
+        <FastImage style={styles.itemFilm} source={{uri: thumbnail.path}} />
         <View
           style={{
             position: 'absolute',
@@ -46,7 +110,7 @@ const SearchScreen = ({navigation}) => {
             alignItems: 'center',
           }}>
           <IconStar />
-          <Text style={[SubHeading, {marginStart: 3}]}>{star}</Text>
+          <Text style={[SubHeading, {marginStart: 3}]}>{score}</Text>
         </View>
       </Pressable>
     );
@@ -76,6 +140,8 @@ const SearchScreen = ({navigation}) => {
       {/* Search View */}
       <View style={styles.searchView}>
         <TextInput
+          value={searchKeyWord}
+          onChangeText={setSearchKeyWord}
           style={{
             flex: 1,
             ...Regular17,
@@ -86,6 +152,9 @@ const SearchScreen = ({navigation}) => {
           placeholderTextColor={Colors.button_primary}
         />
         <Pressable
+          onPress={() => {
+            navigation.navigate('SearchResultScreen', {query: searchKeyWord});
+          }}
           style={{
             width: 43,
             height: 43,
@@ -100,7 +169,10 @@ const SearchScreen = ({navigation}) => {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{paddingBottom: 60}}>
+        contentContainerStyle={{paddingBottom: 60}}
+        refreshControl={
+          <RefreshControl onRefresh={onRefresh} refreshing={refreshing} />
+        }>
         {/* Newest */}
         <View>
           <Text style={[Heading, {marginTop: 15}]}>Newest</Text>
@@ -113,10 +185,10 @@ const SearchScreen = ({navigation}) => {
               containerWidth={WINDOW_WIDTH - 20}
               separatorWidth={0}
               inActiveOpacity={0.4}
-              data={FILM_DATA}
+              data={listFilmNewest}
               ref={carousel}
               onScrollEnd={(item, index) => {
-                setCurrentFilmSelect(FILM_DATA[index]);
+                setCurrentFilmSelect(listFilmNewest[index]);
               }}
             />
           </View>
@@ -136,29 +208,41 @@ const SearchScreen = ({navigation}) => {
                     textTransform: 'capitalize',
                   },
                 ]}>
-                {currentFilmSelect.years} -{' '}
-                {currentFilmSelect.categories.join('/')}
+                {currentFilmSelect?.list_category?.map((item, index, data) => {
+                  if (index >= data.length - 1) return item.name;
+                  return item.name.concat('/');
+                })}
               </Text>
             </View>
             <Pressable
               style={styles.buttonPlay}
               onPress={() => {
-                navigation.navigate('WatchFilmScreen');
+                navigation.navigate('WatchFilmScreen', {
+                  data: currentFilmSelect,
+                  episodeIndex: 0,
+                });
               }}>
               <IconPlayOutlineSmall />
             </Pressable>
           </View>
         </View>
+
         {/* Suggest container */}
         <View style={styles.suggestContainer}>
           <Text style={[Heading]}>Suggest for you</Text>
           <View style={styles.filmContainer}>
-            {FILM_DATA.map((item, index) => {
+            {listFilmSuggest.map((item, index) => {
               return (
                 <Film
-                  key={item._id}
                   data={item}
+                  key={item._id}
                   style={styles.filmContainerStyle}
+                  onPress={() => {
+                    navigation.navigate('WatchFilmScreen', {
+                      data: item,
+                      episodeIndex: 0,
+                    });
+                  }}
                 />
               );
             })}
@@ -166,7 +250,7 @@ const SearchScreen = ({navigation}) => {
         </View>
 
         {/* Suggest container */}
-        <View style={styles.suggestContainer}>
+        {/* <View style={styles.suggestContainer}>
           <Text style={[Heading]}>Film of season</Text>
           <View style={styles.filmContainer}>
             {FILM_DATA.map((item, index) => {
@@ -179,7 +263,7 @@ const SearchScreen = ({navigation}) => {
               );
             })}
           </View>
-        </View>
+        </View> */}
       </ScrollView>
     </SafeAreaView>
   );
@@ -239,7 +323,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    // paddingHorizontal: 15,
+    paddingHorizontal: 15,
     marginTop: 15,
   },
   filmContainerStyle: {

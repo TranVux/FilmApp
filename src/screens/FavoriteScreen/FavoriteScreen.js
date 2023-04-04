@@ -5,9 +5,29 @@ import {Colors} from '../../assets/colors';
 import {ScrollView} from 'react-native-gesture-handler';
 import {Heading} from '../../assets/typography';
 import Film from '../../components/Film';
-import {FILM_DATA} from '../../assets/data/FilmData';
+import AxiosInstance from '../../utils/AxiosInstance';
+import {useSelector} from 'react-redux';
 
 const FavoriteScreen = ({navigation}) => {
+  const [listMyCollection, setListMyCollection] = React.useState([]);
+  const {_id} = useSelector(state => state.dataUser);
+
+  const handleGetMyCollection = async () => {
+    try {
+      const res = await AxiosInstance().get(`auth/collections/${_id}`);
+      console.log(res);
+      if (!res.error) {
+        setListMyCollection(res.data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  React.useEffect(() => {
+    handleGetMyCollection();
+  }, []);
+
   return (
     <View
       style={{
@@ -35,13 +55,18 @@ const FavoriteScreen = ({navigation}) => {
         <View>
           <Text style={[Heading, {marginBottom: 15}]}>My Collection</Text>
           <ScrollView showsHorizontalScrollIndicator={false} horizontal>
-            {FILM_DATA.map((item, index) => {
+            {listMyCollection?.map((item, index) => {
               return (
                 <Film
-                  textBox={'1 Tập'}
                   data={item}
                   key={item._id}
                   style={styles.filmContainerStyle}
+                  onPress={() => {
+                    navigation.navigate('WatchFilmScreen', {
+                      data: item,
+                      episodeIndex: 0,
+                    });
+                  }}
                 />
               );
             })}
@@ -52,7 +77,7 @@ const FavoriteScreen = ({navigation}) => {
         <View style={{marginTop: 30}}>
           <Text style={[Heading, {marginBottom: 15}]}>Bookmark</Text>
           <ScrollView showsHorizontalScrollIndicator={false} horizontal>
-            {FILM_DATA.map((item, index) => {
+            {/* {FILM_DATA.map((item, index) => {
               return (
                 <Film
                   data={item}
@@ -60,7 +85,7 @@ const FavoriteScreen = ({navigation}) => {
                   style={styles.filmContainerStyle}
                 />
               );
-            })}
+            })} */}
           </ScrollView>
         </View>
       </ScrollView>

@@ -22,7 +22,7 @@ import {deleteDataUser, setDataUser} from '../../redux/slices/dataUserSlice';
 
 const SettingScreen = ({navigation}) => {
   const isLogin = useSelector(state => state.isLogin);
-  const {name} = useSelector(state => state.dataUser);
+  const {user_name, image} = useSelector(state => state.dataUser);
   const dispatch = useDispatch();
 
   const handleLoginLogout = async () => {
@@ -57,12 +57,12 @@ const SettingScreen = ({navigation}) => {
               resizeMode={FastImage.resizeMode.contain}
               style={styles.avt}
               source={{
-                uri: 'https://scontent.fsgn5-5.fna.fbcdn.net/v/t39.30808-1/185204302_1163620777456081_5636434007978208375_n.jpg?stp=dst-jpg_p160x160&_nc_cat=100&ccb=1-7&_nc_sid=7206a8&_nc_ohc=n5K2_0IVSBQAX_HNcsq&_nc_ht=scontent.fsgn5-5.fna&oh=00_AfCQTIbASnty8f2flBdymwChaOR5y2c4zh0TvA7BxT-Jeg&oe=641AB87B',
+                uri: image.path,
               }}
             />
 
             <View style={{marginStart: 10}}>
-              <Text style={[HeadingRegular]}>{name}</Text>
+              <Text style={[HeadingRegular]}>{user_name}</Text>
               <Pressable>
                 <Text style={[SubSmall, {color: '#FFFFFFB2'}]}>
                   Edit profile

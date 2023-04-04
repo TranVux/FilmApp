@@ -12,7 +12,7 @@ import {useSelector} from 'react-redux';
 
 const UserScreen = ({navigation}) => {
   const isLogin = useSelector(state => state.isLogin);
-  const {name} = useSelector(state => state.dataUser);
+  const {user_name, image, email} = useSelector(state => state.dataUser);
 
   return (
     <ScrollView
@@ -51,14 +51,14 @@ const UserScreen = ({navigation}) => {
                   resizeMode={FastImage.resizeMode.contain}
                   style={styles.avt}
                   source={{
-                    uri: 'https://scontent.fsgn5-5.fna.fbcdn.net/v/t39.30808-1/185204302_1163620777456081_5636434007978208375_n.jpg?stp=dst-jpg_p160x160&_nc_cat=100&ccb=1-7&_nc_sid=7206a8&_nc_ohc=n5K2_0IVSBQAX_HNcsq&_nc_ht=scontent.fsgn5-5.fna&oh=00_AfCQTIbASnty8f2flBdymwChaOR5y2c4zh0TvA7BxT-Jeg&oe=641AB87B',
+                    uri: image.path,
                   }}
                 />
                 <Pressable style={styles.buttonEdit}>
                   <IconEditor width={15} height={15} />
                 </Pressable>
               </View>
-              <Text style={[HeadingRegular, {marginTop: 5}]}>{name}</Text>
+              <Text style={[HeadingRegular, {marginTop: 5}]}>{user_name}</Text>
             </>
           ) : (
             <>
@@ -94,7 +94,7 @@ const UserScreen = ({navigation}) => {
         </View> */}
 
         {/* History list */}
-        <View style={{marginTop: 30}}>
+        {/* <View style={{marginTop: 30}}>
           <Text style={[Heading, {marginBottom: 15}]}>History</Text>
           <ScrollView showsHorizontalScrollIndicator={false} horizontal>
             {FILM_DATA.map((item, index) => {
@@ -108,7 +108,7 @@ const UserScreen = ({navigation}) => {
               );
             })}
           </ScrollView>
-        </View>
+        </View> */}
       </SafeAreaView>
     </ScrollView>
   );

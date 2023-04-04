@@ -49,6 +49,8 @@ const HomeScreen = ({navigation}) => {
 
   const handleGetFilmByCategory = async () => {
     try {
+      //handle swipe to refresh
+      setRefreshing(true);
       let list_categories = [];
       if (categorySelected.data.name === 'All') {
         list_categories = listCategory.map(item => item.name);

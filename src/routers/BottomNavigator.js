@@ -3,7 +3,7 @@ import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {UserScreen} from '../screens/UserScreen';
 import FavoriteScreen from '../screens/FavoriteScreen';
-import SearchScreen from '../screens/SearchScreen';
+import {SearchScreen} from '../screens/SearchScreen';
 import {Colors} from '../assets/colors';
 import {IconHeart, IconHome, IconSearch, IconUser} from '../assets/svgs';
 import HomeScreenNavigation from '../screens/HomeScreen/HomeScreenNavigation';
@@ -82,5 +82,3 @@ const BottomNavigator = ({navigation}) => {
 };
 
 export default BottomNavigator;
-
-const styles = StyleSheet.create({});

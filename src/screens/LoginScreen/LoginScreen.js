@@ -36,7 +36,7 @@ const LoginScreen = ({navigation}) => {
   const handleLogin = async () => {
     if (dataLogin.email.length > 0 && dataLogin.password.length > 0) {
       try {
-        const res = await AxiosInstance().post('user/login', {
+        const res = await AxiosInstance().post('/auth/login', {
           email: dataLogin.email,
           password: dataLogin.password,
         });
@@ -44,13 +44,17 @@ const LoginScreen = ({navigation}) => {
         if (!res.error) {
           console.log(res);
           console.log('Login Success!');
+          const {_id, user_name, image, email} = res.data;
           ToastAndroid.show('Login Success!', ToastAndroid.SHORT);
 
           //handle isLogin
           dispatch(setIsLogin(true));
-          await AsyncStorage.setItem('UserData', JSON.stringify(res.data));
+          await AsyncStorage.setItem(
+            'UserData',
+            JSON.stringify({_id, user_name, image, email}),
+          );
           await AsyncStorage.setItem('isLogin', 'true');
-          dispatch(setDataUser(res.data));
+          dispatch(setDataUser({_id, user_name, image, email}));
           navigation.navigate('BottomNavigator');
         } else {
           console.log(res);

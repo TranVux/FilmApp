@@ -1,16 +1,14 @@
-import {View, Text, BackHandler} from 'react-native';
 import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import BottomNavigator from './BottomNavigator';
-import StackNavigator from './StackNavigator';
-import FilmDetail, {WatchFilmScreen} from '../screens/FilmDetail';
 import {SettingScreen} from '../screens/UserScreen';
 import {useSelector} from 'react-redux';
 import LoginScreen from '../screens/LoginScreen/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen/RegisterScreen';
 import SplashScreen from '../screens/SplashScreen/SplashScreen';
-import WebViewScreen from '../screens/WebView/WebViewScreen';
+import {SearchResult} from '../screens/SearchScreen';
+import {WatchFilmScreen} from '../screens/FilmDetail';
 
 const AppStack = createStackNavigator();
 
@@ -30,6 +28,10 @@ const STACK_SCREEN = [
   {
     name: 'SettingScreen',
     component: SettingScreen,
+  },
+  {
+    name: 'SearchResultScreen',
+    component: SearchResult,
   },
 ];
 

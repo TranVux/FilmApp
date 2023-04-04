@@ -1,1 +1,4 @@
-export {default} from './SearchScreen';
+import SearchScreen from './SearchScreen';
+import SearchResult from './SearchResult';
+
+export {SearchResult, SearchScreen};
