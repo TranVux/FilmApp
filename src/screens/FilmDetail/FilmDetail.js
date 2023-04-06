@@ -1,4 +1,11 @@
-import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  ToastAndroid,
+  View,
+} from 'react-native';
 import React from 'react';
 import {Colors} from '../../assets/colors';
 import FastImage from 'react-native-fast-image';
@@ -7,9 +14,89 @@ import {IconBack, IconHeart, IconPlayOutlineSmall} from '../../assets/svgs';
 import {Heading, SubHeadingRegular, TextButton} from '../../assets/typography';
 import {Button} from '@rneui/themed';
 import YoutubePlayer from '../../components/YoutubePlayer';
+import {useDispatch, useSelector} from 'react-redux';
+import AxiosInstance from '../../utils/AxiosInstance';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {setDataUser} from '../../redux/slices/dataUserSlice';
 
 const FilmDetail = ({navigation, route}) => {
   const {data} = route.params;
+  const dispatch = useDispatch();
+  const {_id, user_name, image, email, collections} = useSelector(
+    state => state.dataUser,
+  );
+  const [hasInCollection, setHasInCollection] = React.useState(false);
+  const [isAdding, setIsAdding] = React.useState(false);
+
+  const handleAddItemCollection = async () => {
+    //disabled button hearth when request
+    setIsAdding(true);
+
+    if (email) {
+      try {
+        const res = await AxiosInstance().post('/auth/collections/add/toggle', {
+          user_id: _id,
+          film_id: data?._id,
+        });
+        console.log(res);
+        if (!res.error) {
+          if (res?.data?.collections.length > collections.length) {
+            setHasInCollection(true);
+            ToastAndroid.show(
+              'Add to collection successfully',
+              ToastAndroid.SHORT,
+            );
+          } else {
+            setHasInCollection(false);
+            ToastAndroid.show(
+              'Remove from collection successfully',
+              ToastAndroid.SHORT,
+            );
+          }
+
+          //update data after add or remove item from collection
+          await AsyncStorage.setItem(
+            'UserData',
+            JSON.stringify({
+              _id,
+              user_name,
+              image,
+              email,
+              collections: res?.data?.collections,
+            }),
+          );
+          dispatch(
+            setDataUser({
+              _id,
+              user_name,
+              image,
+              email,
+              collections: res?.data?.collections,
+            }),
+          );
+
+          //
+        } else {
+          ToastAndroid.show('Add to collection failure', ToastAndroid.SHORT);
+        }
+      } catch (error) {
+        console.log(error);
+        ToastAndroid.show('Add to collection failure', ToastAndroid.SHORT);
+      }
+    } else {
+      ToastAndroid.show(
+        'You must login to use this function!!',
+        ToastAndroid.SHORT,
+      );
+    }
+
+    //enabled button hearth when request complete
+    setIsAdding(false);
+  };
+
+  React.useEffect(() => {
+    setHasInCollection(collections?.includes(data._id));
+  }, []);
 
   return (
     <ScrollView
@@ -33,7 +120,13 @@ const FilmDetail = ({navigation, route}) => {
                 }}>
                 <IconBack width={27} height={27} />
               </Pressable>
-              <IconHeart width={27} height={27} />
+              <Pressable disabled={isAdding} onPress={handleAddItemCollection}>
+                <IconHeart
+                  width={27}
+                  height={27}
+                  fillColor={hasInCollection ? Colors.red : '#fff'}
+                />
+              </Pressable>
             </View>
             <View
               style={{

@@ -35,6 +35,7 @@ const HomeScreen = ({navigation}) => {
   };
 
   const handleGetTrendingMovie = async () => {
+    setRefreshing(true);
     try {
       const _listTrendingMovie = await AxiosInstance().get('/film/trending');
       setTrendingMovieList(_listTrendingMovie.data);

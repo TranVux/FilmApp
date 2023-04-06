@@ -1,18 +1,133 @@
-import {SafeAreaView, StyleSheet, Text, View} from 'react-native';
+import {
+  ActivityIndicator,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  ToastAndroid,
+  View,
+} from 'react-native';
 import React from 'react';
 import {Colors} from '../../assets/colors';
-import {Heading, HeadingRegular, SubHeading} from '../../assets/typography';
+import {
+  Heading,
+  HeadingRegular,
+  Medium15,
+  Medium18,
+  SubHeading,
+} from '../../assets/typography';
 import {IconEditor, IconSetting} from '../../assets/svgs';
 import {Pressable} from 'react-native';
 import FastImage from 'react-native-fast-image';
 import Film from '../../components/Film';
-import {FILM_DATA} from '../../assets/data/FilmData';
 import {ScrollView} from 'react-native-gesture-handler';
-import {useSelector} from 'react-redux';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import {useDispatch, useSelector} from 'react-redux';
+import Dialog from 'react-native-dialog';
+import AxiosInstance from '../../utils/AxiosInstance';
+import {setDataUser} from '../../redux/slices/dataUserSlice';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const UserScreen = ({navigation}) => {
   const isLogin = useSelector(state => state.isLogin);
-  const {user_name, image, email} = useSelector(state => state.dataUser);
+  const {user_name, image, _id, email, collections} = useSelector(
+    state => state.dataUser,
+  );
+  const dispatch = useDispatch();
+
+  const [uriImage, setUriImage] = React.useState('');
+  const [dialogDisplay, setDialogDisplay] = React.useState(false);
+  const [isUploading, setIsUploading] = React.useState(false);
+
+  const handleUploadImage = async () => {
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('user_id', _id);
+      formData.append('image', {
+        uri: uriImage,
+        type: 'image/jpeg',
+        name: 'image.jpg',
+      });
+      const result = await AxiosInstance('multipart/form-data').post(
+        '/auth/update_image',
+        formData,
+      );
+
+      if (!result.error) {
+        console.log(result);
+        let actionSetDataUser = setDataUser({
+          user_name,
+          _id,
+          email,
+          image: result.data.image,
+          collections,
+        });
+        dispatch(actionSetDataUser);
+        await AsyncStorage.setItem(
+          'UserData',
+          JSON.stringify({
+            _id,
+            user_name,
+            image: result.data.image,
+            email,
+            collections,
+          }),
+        );
+        setDialogDisplay(false);
+        ToastAndroid.show(
+          'Upload profile image successfully!',
+          ToastAndroid.SHORT,
+        );
+      }
+    } catch (error) {
+      console.log(error);
+      ToastAndroid.show(
+        'Upload profile image failure!. Try again!!!!',
+        ToastAndroid.SHORT,
+      );
+    }
+    setIsUploading(false);
+  };
+
+  const handleUriImage = async type => {
+    let options = {
+      storageOptions: {
+        path: 'images',
+        mediaType: 'photo',
+      },
+      includeBase64: true,
+    };
+
+    let res;
+    switch (type) {
+      case 'Camera': {
+        res = await launchCamera(options);
+        break;
+      }
+      case 'Gallery': {
+        res = await launchImageLibrary(options);
+        break;
+      }
+      default:
+        throw new Error('Invalid type ');
+    }
+
+    console.log(res);
+    if (res.didCancel) {
+      console.log(res);
+    } else if (res.errorCode === 'camera_unavailable') {
+      ToastAndroid.show('Camera not available!');
+    } else if (res.errorCode === 'permission') {
+      ToastAndroid.show("Haven't permission access camera");
+    } else if (res.errorCode === 'others') {
+      console.log(res.errorMessage);
+    } else {
+      setUriImage(res.assets[0].uri);
+      console.log(res.assets[0].uri);
+      // console.log(uriImage);
+      handleUploadImage();
+    }
+  };
 
   return (
     <ScrollView
@@ -51,10 +166,16 @@ const UserScreen = ({navigation}) => {
                   resizeMode={FastImage.resizeMode.contain}
                   style={styles.avt}
                   source={{
-                    uri: image.path,
+                    uri: image?.path
+                      ? image?.path
+                      : 'https://images.placeholders.dev/?width=1055&height=100&text=Made%20with%20placeholders.dev&bgColor=%23f7f6f6&textColor=%236d6e71',
                   }}
                 />
-                <Pressable style={styles.buttonEdit}>
+                <Pressable
+                  style={styles.buttonEdit}
+                  onPress={() => {
+                    setDialogDisplay(true);
+                  }}>
                   <IconEditor width={15} height={15} />
                 </Pressable>
               </View>
@@ -82,34 +203,64 @@ const UserScreen = ({navigation}) => {
             </>
           )}
         </View>
-
-        {/* Bookmark list */}
-        {/* <View style={{marginTop: 30}}>
-          <Text style={[Heading, {marginBottom: 15}]}>Bookmark</Text>
-          <ScrollView showsHorizontalScrollIndicator={false} horizontal>
-            {FILM_DATA.map((item, index) => {
-              return <Film data={item} style={styles.filmContainerStyle} />;
-            })}
-          </ScrollView>
-        </View> */}
-
-        {/* History list */}
-        {/* <View style={{marginTop: 30}}>
-          <Text style={[Heading, {marginBottom: 15}]}>History</Text>
-          <ScrollView showsHorizontalScrollIndicator={false} horizontal>
-            {FILM_DATA.map((item, index) => {
-              return (
-                <Film
-                  key={item._id}
-                  textBox={'Tập 1'}
-                  data={item}
-                  style={styles.filmContainerStyle}
-                />
-              );
-            })}
-          </ScrollView>
-        </View> */}
       </SafeAreaView>
+      <Dialog.Container
+        useNativeDriver="true"
+        onBackdropPress={() => {
+          setDialogDisplay(false);
+        }}
+        visible={dialogDisplay}>
+        <Dialog.Title style={[Medium18, {color: Colors.primary}]}>
+          Change Profile Image
+        </Dialog.Title>
+        {!isUploading ? (
+          <View>
+            <Pressable
+              onPress={() => {
+                handleUriImage('Camera');
+              }}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                paddingStart: 30,
+              }}>
+              <FastImage
+                source={require('../../assets/images/camera.png')}
+                style={{width: 50, height: 50, marginEnd: 15}}
+              />
+              <Text style={[Medium15, {color: Colors.primary}]}>Camera</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => {
+                handleUriImage('Gallery');
+              }}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                paddingStart: 30,
+              }}>
+              <FastImage
+                source={require('../../assets/images/gallery.png')}
+                style={{width: 50, height: 50, marginEnd: 15}}
+              />
+              <Text style={[Medium15, {color: Colors.primary}]}>Gallery</Text>
+            </Pressable>
+          </View>
+        ) : (
+          <View>
+            <ActivityIndicator size={'large'} color={Colors.red_second} />
+          </View>
+        )}
+
+        <Dialog.Button
+          disabled={isUploading}
+          label="Cancel"
+          style={[Medium15, {color: Colors.red, textTransform: 'capitalize'}]}
+          onPress={() => {
+            setDialogDisplay(false);
+          }}
+        />
+      </Dialog.Container>
     </ScrollView>
   );
 };

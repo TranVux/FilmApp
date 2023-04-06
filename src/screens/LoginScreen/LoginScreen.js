@@ -1,4 +1,4 @@
-import {StyleSheet, Text, ToastAndroid, View} from 'react-native';
+import {StyleSheet, Text, ToastAndroid, View, Animated} from 'react-native';
 import React from 'react';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {Colors} from '../../assets/colors';
@@ -17,13 +17,17 @@ import {setIsLogin} from '../../redux/slices/isLoginSlice';
 import AxiosInstance from '../../utils/AxiosInstance';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {setDataUser} from '../../redux/slices/dataUserSlice';
+import {ActivityIndicator} from 'react-native';
 
 const LoginScreen = ({navigation}) => {
+  const opacityValue = React.useRef(new Animated.Value(0)).current;
+
   const dispatch = useDispatch();
   const [dataLogin, setDataLogin] = React.useState({
     email: '',
     password: '',
   });
+  const [isLoading, setIsLoading] = React.useState(false);
 
   const handleChangePassword = text => {
     setDataLogin({...dataLogin, password: text});
@@ -33,7 +37,28 @@ const LoginScreen = ({navigation}) => {
     setDataLogin({...dataLogin, email: text});
   };
 
+  const handleAnimationFadeInDialog = () => {
+    setIsLoading(true);
+    console.log('Animated');
+    Animated.timing(opacityValue, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handleAnimationFadeOutDialog = () => {
+    console.log('Animated');
+    Animated.timing(opacityValue, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+    setIsLoading(false);
+  };
+
   const handleLogin = async () => {
+    handleAnimationFadeInDialog();
     if (dataLogin.email.length > 0 && dataLogin.password.length > 0) {
       try {
         const res = await AxiosInstance().post('/auth/login', {
@@ -44,17 +69,17 @@ const LoginScreen = ({navigation}) => {
         if (!res.error) {
           console.log(res);
           console.log('Login Success!');
-          const {_id, user_name, image, email} = res.data;
+          const {_id, user_name, image, email, collections} = res.data;
           ToastAndroid.show('Login Success!', ToastAndroid.SHORT);
 
           //handle isLogin
           dispatch(setIsLogin(true));
           await AsyncStorage.setItem(
             'UserData',
-            JSON.stringify({_id, user_name, image, email}),
+            JSON.stringify({_id, user_name, image, email, collections}),
           );
           await AsyncStorage.setItem('isLogin', 'true');
-          dispatch(setDataUser({_id, user_name, image, email}));
+          dispatch(setDataUser({_id, user_name, image, email, collections}));
           navigation.navigate('BottomNavigator');
         } else {
           console.log(res);
@@ -71,6 +96,7 @@ const LoginScreen = ({navigation}) => {
         );
       }
     }
+    handleAnimationFadeOutDialog();
   };
   return (
     <KeyboardAwareScrollView
@@ -151,6 +177,22 @@ const LoginScreen = ({navigation}) => {
           </View>
         </View>
       </View>
+      {isLoading && (
+        <Animated.View
+          style={[
+            styles.styleDialog,
+            {
+              opacity: opacityValue,
+            },
+          ]}>
+          <View style={styles.dialogBox}>
+            <ActivityIndicator size={'large'} color={Colors.red} />
+            <Text style={[Medium15, {color: Colors.primary}]}>
+              Please wait...
+            </Text>
+          </View>
+        </Animated.View>
+      )}
     </KeyboardAwareScrollView>
   );
 };
@@ -177,5 +219,25 @@ const styles = StyleSheet.create({
   iconButton: {
     // position: 'absolute',
     // start: 20,
+  },
+  styleDialog: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#00000060',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    zIndex: 10,
+  },
+  dialogBox: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    gap: 5,
+    elevation: 5,
   },
 });

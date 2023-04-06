@@ -18,14 +18,16 @@ import {RefreshControl} from 'react-native-gesture-handler';
 
 const WatchFilmScreen = ({navigation, route}) => {
   const {data, episodeIndex} = route.params;
+  const scrollViewRef = React.useRef();
   const [currentEpisodeIndex, setCurrentEpisodeIndex] =
     React.useState(episodeIndex);
+  const [currentFilm, setCurrentFilm] = React.useState(data);
 
   const [listFilmSuggest, setListFilmSuggest] = React.useState([]);
   const [refreshing, setRefreshing] = React.useState(false);
 
   const handleGetSuggestFilm = async () => {
-    const list_categories = data.list_category.map(item => {
+    const list_categories = currentFilm.list_category.map(item => {
       return item.name;
     });
 
@@ -58,12 +60,13 @@ const WatchFilmScreen = ({navigation, route}) => {
   return (
     <SafeAreaView style={{backgroundColor: Colors.primary, flex: 1}}>
       <YoutubePlayer
-        videoID={data.list_episode[currentEpisodeIndex].video_id}
+        videoID={currentFilm.list_episode[currentEpisodeIndex].video_id}
       />
 
       <ScrollView
         nestedScrollEnabled={true}
         showsVerticalScrollIndicator={false}
+        ref={scrollViewRef}
         contentContainerStyle={{flexGrow: 1, backgroundColor: Colors.primary}}
         refreshControl={
           <RefreshControl onRefresh={onRefresh} refreshing={refreshing} />
@@ -71,7 +74,7 @@ const WatchFilmScreen = ({navigation, route}) => {
         <View style={styles.contentContainer}>
           <View style={{marginTop: 20}}>
             <Text style={[SubHeading]}>
-              {data?.list_episode[currentEpisodeIndex].name}
+              {currentFilm?.list_episode[currentEpisodeIndex].name}
             </Text>
             <View
               style={{
@@ -81,7 +84,7 @@ const WatchFilmScreen = ({navigation, route}) => {
               }}>
               <IconView />
               <Text style={[SubSmall, {marginStart: 3}]}>
-                {data.views ? data.views : '0'}
+                {currentFilm.views ? data.views : '0'}
               </Text>
             </View>
           </View>
@@ -90,7 +93,7 @@ const WatchFilmScreen = ({navigation, route}) => {
           <View style={styles.actionContainer}>
             <ButtonVerticalIcon
               buttonLikeToggle={true}
-              title={data.like}
+              title={currentFilm.like}
               initTintColorToggle={'#fff'}
               colorToggle={Colors.red}
             />
@@ -116,7 +119,7 @@ const WatchFilmScreen = ({navigation, route}) => {
               nestedScrollEnabled={true}
               showsHorizontalScrollIndicator={false}>
               <View style={styles.episodeContainer}>
-                {data?.list_episode?.map((item, index) => (
+                {currentFilm?.list_episode?.map((item, index) => (
                   <Pressable
                     onPress={() => {
                       onChangeFilmEpisode(index);
@@ -142,7 +145,7 @@ const WatchFilmScreen = ({navigation, route}) => {
               nestedScrollEnabled={true}
               showsHorizontalScrollIndicator={false}>
               <View style={styles.relativeFilmContainer}>
-                {data?._id_collection?.films?.map(item => (
+                {currentFilm?._id_collection?.films?.map(item => (
                   <Pressable
                     key={item._id}
                     style={[
@@ -169,6 +172,14 @@ const WatchFilmScreen = ({navigation, route}) => {
                     data={item}
                     key={item._id}
                     style={styles.filmContainerStyle}
+                    onPress={() => {
+                      setCurrentFilm(item);
+                      handleGetSuggestFilm();
+                      scrollViewRef.current?.scrollTo({
+                        y: 0,
+                        animated: true,
+                      });
+                    }}
                   />
                 );
               })}

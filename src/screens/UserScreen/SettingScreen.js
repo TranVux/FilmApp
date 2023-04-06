@@ -57,7 +57,7 @@ const SettingScreen = ({navigation}) => {
               resizeMode={FastImage.resizeMode.contain}
               style={styles.avt}
               source={{
-                uri: image.path,
+                uri: image?.path,
               }}
             />
 

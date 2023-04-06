@@ -1,4 +1,10 @@
-import {StyleSheet, Text, View} from 'react-native';
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  View,
+  Animated,
+} from 'react-native';
 import React from 'react';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {Colors} from '../../assets/colors';
@@ -16,11 +22,34 @@ import AxiosInstance from '../../utils/AxiosInstance';
 import {ToastAndroid} from 'react-native';
 
 const RegisterScreen = ({navigation}) => {
+  const opacityValue = React.useRef(new Animated.Value(0)).current;
+
   const [dataRegister, setDataRegister] = React.useState({
     email: '',
     password: '',
     username: '',
   });
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  const handleAnimationFadeInDialog = () => {
+    setIsLoading(true);
+    console.log('Animated');
+    Animated.timing(opacityValue, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handleAnimationFadeOutDialog = () => {
+    console.log('Animated');
+    Animated.timing(opacityValue, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+    setIsLoading(false);
+  };
 
   const handleEmail = text => {
     setDataRegister({...dataRegister, email: text});
@@ -41,7 +70,8 @@ const RegisterScreen = ({navigation}) => {
       dataRegister.username.length > 0
     ) {
       try {
-        const res = await AxiosInstance().post('/user/register', dataRegister);
+        handleAnimationFadeInDialog();
+        const res = await AxiosInstance().post('/auth/register', dataRegister);
         if (!res.error) {
           console.log(res.data);
           ToastAndroid.show('Register success!', ToastAndroid.SHORT);
@@ -56,6 +86,7 @@ const RegisterScreen = ({navigation}) => {
     } else {
       ToastAndroid.show('Please fill all data!', ToastAndroid.SHORT);
     }
+    handleAnimationFadeOutDialog();
   };
 
   return (
@@ -135,6 +166,16 @@ const RegisterScreen = ({navigation}) => {
           </View>
         </View>
       </View>
+      {isLoading && (
+        <Animated.View style={styles.styleDialog}>
+          <View style={styles.dialogBox}>
+            <ActivityIndicator size={'large'} color={Colors.red} />
+            <Text style={[Medium15, {color: Colors.primary}]}>
+              Please wait...
+            </Text>
+          </View>
+        </Animated.View>
+      )}
     </KeyboardAwareScrollView>
   );
 };
@@ -158,4 +199,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   iconButton: {},
+  styleDialog: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#00000060',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    zIndex: 10,
+  },
+  dialogBox: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    gap: 5,
+    elevation: 5,
+  },
 });
