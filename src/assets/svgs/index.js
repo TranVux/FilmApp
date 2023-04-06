@@ -587,6 +587,26 @@ export function IconEye(props) {
   );
 }
 
+export function IconEyeOff(props) {
+  return (
+    <Svg
+      width={27}
+      height={27}
+      viewBox="0 0 27 27"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}>
+      <Path
+        d="M7.875 7.157A10.92 10.92 0 0113.5 5.625c7.095 0 10.538 6.393 11.149 7.659a.488.488 0 010 .433c-.396.82-1.976 3.782-4.962 5.772M15.75 21.15c-.74.15-1.494.226-2.25.225-7.095 0-10.538-6.393-11.149-7.659a.495.495 0 010-.434A15.83 15.83 0 014.5 10.036m6.75.949a3.375 3.375 0 014.765 4.765M3.375 3.375l20.25 20.25"
+        stroke="#1A1B42"
+        strokeWidth={2.25}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
 export function IconGoogle(props) {
   return (
     <Svg

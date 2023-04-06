@@ -18,10 +18,19 @@ import {useDispatch, useSelector} from 'react-redux';
 import AxiosInstance from '../../utils/AxiosInstance';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {setDataUser} from '../../redux/slices/dataUserSlice';
+import {
+  addHistoryItem,
+  setHistoryData,
+} from '../../redux/slices/filmsHistorySlice';
+import {useNavigation} from '@react-navigation/native';
 
 const FilmDetail = ({navigation, route}) => {
+  const _navigation = useNavigation();
   const {data} = route.params;
   const dispatch = useDispatch();
+
+  //get data from store of redux
+  const filmHistory = useSelector(state => state.filmHistory);
   const {_id, user_name, image, email, collections} = useSelector(
     state => state.dataUser,
   );
@@ -116,7 +125,7 @@ const FilmDetail = ({navigation, route}) => {
             <View style={styles.header}>
               <Pressable
                 onPress={() => {
-                  navigation.goBack();
+                  _navigation.goBack();
                 }}>
                 <IconBack width={27} height={27} />
               </Pressable>
@@ -149,8 +158,11 @@ const FilmDetail = ({navigation, route}) => {
           </LinearGradient>
         </FastImage>
         <Button
-          onPress={() => {
+          onPress={async () => {
             navigation.navigate('WatchFilmScreen', {data, episodeIndex: 0});
+            if (!filmHistory?.includes(data._id)) {
+              dispatch(addHistoryItem(data._id));
+            }
           }}
           iconPosition="left"
           icon={<IconPlayOutlineSmall />}

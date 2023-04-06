@@ -217,9 +217,8 @@ const SearchScreen = ({navigation}) => {
             <Pressable
               style={styles.buttonPlay}
               onPress={() => {
-                navigation.navigate('WatchFilmScreen', {
+                navigation.navigate('FilmDetailSearchScreen', {
                   data: currentFilmSelect,
-                  episodeIndex: 0,
                 });
               }}>
               <IconPlayOutlineSmall />
@@ -238,9 +237,8 @@ const SearchScreen = ({navigation}) => {
                   key={item._id}
                   style={styles.filmContainerStyle}
                   onPress={() => {
-                    navigation.navigate('WatchFilmScreen', {
+                    navigation.navigate('FilmDetailSearchScreen', {
                       data: item,
-                      episodeIndex: 0,
                     });
                   }}
                 />

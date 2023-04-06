@@ -124,10 +124,11 @@ const SearchResult = ({navigation, route}) => {
                   data={item}
                   key={item._id}
                   style={styles.filmContainerStyle}
-                  onPress={navigation.navigate('WatchFilmScreen', {
-                    data: item,
-                    episodeIndex: 0,
-                  })}
+                  onPress={() => {
+                    navigation.navigate('FilmDetailSearchScreen', {
+                      data: item,
+                    });
+                  }}
                 />
               );
             })}

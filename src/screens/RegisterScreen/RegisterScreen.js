@@ -104,17 +104,17 @@ const RegisterScreen = ({navigation}) => {
 
         <View style={styles.inputContainer}>
           <InputField
-            style={styles.inputField}
+            containerStyle={styles.inputField}
             placeholder={'Username'}
             onChangeText={handleUsername}
           />
           <InputField
-            style={styles.inputField}
+            containerStyle={styles.inputField}
             placeholder={'Email'}
             onChangeText={handleEmail}
           />
           <InputField
-            style={styles.inputField}
+            containerStyle={styles.inputField}
             placeholder={'Password'}
             securePassword
             onChangeText={handlePassword}

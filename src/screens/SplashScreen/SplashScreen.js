@@ -6,6 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch} from 'react-redux';
 import {setIsLogin} from '../../redux/slices/isLoginSlice';
 import {deleteDataUser, setDataUser} from '../../redux/slices/dataUserSlice';
+import {setHistoryData} from '../../redux/slices/filmsHistorySlice';
 
 const SplashScreen = ({navigation}) => {
   const dispatch = useDispatch();
@@ -19,6 +20,12 @@ const SplashScreen = ({navigation}) => {
         dispatch(setDataUser(JSON.parse(dataUser)));
       } else {
         dispatch(deleteDataUser());
+      }
+
+      const filmHistory = await AsyncStorage.getItem('FilmHistory');
+      console.log(filmHistory);
+      if (filmHistory) {
+        dispatch(setHistoryData(JSON.parse(filmHistory)));
       }
       // console.log('HandleFirstData: ' + isLogin);
       navigation.navigate('BottomNavigator');

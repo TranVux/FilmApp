@@ -2,7 +2,7 @@ import {StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import {TextInput} from 'react-native-gesture-handler';
 import {Colors} from '../assets/colors';
-import {IconEye} from '../assets/svgs';
+import {IconEye, IconEyeOff} from '../assets/svgs';
 import {Pressable} from 'react-native';
 import {HeadingRegular, Medium15} from '../assets/typography';
 
@@ -11,7 +11,8 @@ const DEFAULT_FUNCTION = () => {};
 const InputField = ({
   title,
   securePassword,
-  style,
+  containerStyle,
+  textInputStyle,
   placeholder,
   onChangeText = DEFAULT_FUNCTION,
 }) => {
@@ -31,10 +32,10 @@ const InputField = ({
           justifyContent: 'space-between',
           alignItems: 'center',
         },
-        {...style},
+        containerStyle,
       ]}>
       <TextInput
-        style={[styles.textInput]}
+        style={[styles.textInput, textInputStyle]}
         placeholder={placeholder}
         secureTextEntry={showPass}
         onChangeText={onChangeText}
@@ -42,7 +43,7 @@ const InputField = ({
       />
       {securePassword && (
         <Pressable onPress={handleToggleShowPass}>
-          <IconEye />
+          {showPass ? <IconEyeOff /> : <IconEye />}
         </Pressable>
       )}
     </View>

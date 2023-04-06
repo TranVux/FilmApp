@@ -14,7 +14,7 @@ const dataUser = createSlice({
     });
     builder.addCase(setDataUser.fulfilled, (state, actions) => {
       console.log('set data user success');
-      return {...state, ...actions.payload};
+      return actions.payload;
     });
     builder.addCase(setDataUser.rejected, state => {
       console.log('state when reject: ' + state);

@@ -1,9 +1,7 @@
-import {View, Text} from 'react-native';
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import HomeScreen from './HomeScreen';
-import {FilmDetail, WatchFilmScreen} from '../FilmDetail';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {FilmDetail} from '../FilmDetail';
 
 const StackHome = createStackNavigator();
 

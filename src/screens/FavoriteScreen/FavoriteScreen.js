@@ -6,12 +6,17 @@ import {RefreshControl, ScrollView} from 'react-native-gesture-handler';
 import {Heading, Medium15} from '../../assets/typography';
 import Film from '../../components/Film';
 import AxiosInstance from '../../utils/AxiosInstance';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
+import {addHistoryItem} from '../../redux/slices/filmsHistorySlice';
 
 const FavoriteScreen = ({navigation}) => {
   const [listMyCollection, setListMyCollection] = React.useState([]);
+  const [listFilmSuggest, setListFilmSuggest] = React.useState([]);
+
   const [isLoading, setIsLoading] = React.useState(false);
   const {_id} = useSelector(state => state.dataUser);
+  const dispatch = useDispatch();
+  const filmHistory = useSelector(state => state.filmHistory);
 
   const handleGetMyCollection = async () => {
     setIsLoading(true);
@@ -27,12 +32,27 @@ const FavoriteScreen = ({navigation}) => {
     setIsLoading(false);
   };
 
+  const handleGetSuggestFilm = async () => {
+    try {
+      setIsLoading(true);
+      const _listFilmSuggest = await AxiosInstance().get('/film/trending');
+      console.log(_listFilmSuggest);
+
+      setListFilmSuggest(_listFilmSuggest.data);
+    } catch (error) {
+      console.log(error);
+    }
+    setIsLoading(false);
+  };
+
   const onRefresh = () => {
     setIsLoading(true);
     handleGetMyCollection();
+    handleGetSuggestFilm();
   };
 
   React.useEffect(() => {
+    handleGetSuggestFilm();
     handleGetMyCollection();
   }, []);
 
@@ -72,12 +92,14 @@ const FavoriteScreen = ({navigation}) => {
                 <Film
                   data={item}
                   key={item._id}
-                  style={styles.filmContainerStyle}
                   onPress={() => {
                     navigation.navigate('WatchFilmScreen', {
                       data: item,
                       episodeIndex: 0,
                     });
+                    if (!filmHistory?.includes(item._id)) {
+                      dispatch(addHistoryItem(item._id));
+                    }
                   }}
                 />
               );
@@ -95,21 +117,32 @@ const FavoriteScreen = ({navigation}) => {
             </View>
           )}
         </View>
-        {/* Bookmark list */}
-        <View style={{marginTop: 30}}>
-          {/* <Text style={[Heading, {marginBottom: 15}]}>Bookmark</Text> */}
-          <ScrollView showsHorizontalScrollIndicator={false} horizontal>
-            {/* {FILM_DATA.map((item, index) => {
-              return (
-                <Film
-                  data={item}
-                  key={item._id}
-                  style={styles.filmContainerStyle}
-                />
-              );
-            })} */}
-          </ScrollView>
-        </View>
+        {/* Suggest container */}
+        <Text style={[Heading, {marginTop: 20}]}>Suggest for you</Text>
+        <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+          <View style={styles.suggestContainer}>
+            <View style={styles.filmContainer}>
+              {listFilmSuggest.map((item, index) => {
+                return (
+                  <Film
+                    data={item}
+                    key={item._id}
+                    style={styles.filmContainerStyle}
+                    onPress={() => {
+                      navigation.navigate('FilmDetail', {
+                        data: item,
+                        episodeIndex: 0,
+                      });
+                      if (!filmHistory?.includes(item._id)) {
+                        dispatch(addHistoryItem(item._id));
+                      }
+                    }}
+                  />
+                );
+              })}
+            </View>
+          </View>
+        </ScrollView>
       </ScrollView>
     </View>
     // </ScrollView>
@@ -124,5 +157,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingBottom: 15,
+  },
+  suggestContainer: {
+    marginTop: 15,
+  },
+  filmContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
 });

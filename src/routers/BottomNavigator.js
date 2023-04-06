@@ -2,10 +2,10 @@ import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {UserScreen} from '../screens/UserScreen';
 import FavoriteScreen from '../screens/FavoriteScreen';
-import {SearchScreen} from '../screens/SearchScreen';
 import {Colors} from '../assets/colors';
 import {IconHeart, IconHome, IconSearch, IconUser} from '../assets/svgs';
 import HomeScreenNavigation from '../screens/HomeScreen/HomeScreenNavigation';
+import SearchNavigatorScreen from '../screens/SearchScreen/SearchScreenNavigator';
 
 const BottomTab = createBottomTabNavigator();
 
@@ -42,7 +42,7 @@ const BottomNavigator = ({navigation}) => {
                   fillColor={focused ? Colors.red : '#fff'}
                 />
               );
-            case 'SearchScreen':
+            case 'SearchNavigatorScreen':
               return (
                 <IconSearch
                   width={24}
@@ -73,7 +73,10 @@ const BottomNavigator = ({navigation}) => {
         component={HomeScreenNavigation}
         name="HomeScreenNavigation"
       />
-      <BottomTab.Screen component={SearchScreen} name="SearchScreen" />
+      <BottomTab.Screen
+        component={SearchNavigatorScreen}
+        name="SearchNavigatorScreen"
+      />
       <BottomTab.Screen component={FavoriteScreen} name="FavoriteScreen" />
       <BottomTab.Screen component={UserScreen} name="UserScreen" />
     </BottomTab.Navigator>

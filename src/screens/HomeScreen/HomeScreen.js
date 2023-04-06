@@ -12,7 +12,10 @@ import Film from '../../components/Film';
 import AxiosInstance from '../../utils/AxiosInstance';
 import {RefreshControl} from 'react-native-gesture-handler';
 
+import {useDispatch, useSelector} from 'react-redux';
+
 const HomeScreen = ({navigation}) => {
+  const listCategoryRef = React.useRef();
   const [categorySelected, setCategorySelected] = React.useState({
     index: 0,
     data: {},
@@ -101,6 +104,35 @@ const HomeScreen = ({navigation}) => {
     );
   };
 
+  const renderItemCategory = ({item, index}) => {
+    return (
+      <Chip
+        containerStyle={{
+          marginHorizontal: 8,
+        }}
+        touchSoundDisabled={true}
+        onPress={() => {
+          handleSelectedCategory(index, item);
+          listCategoryRef.current?.scrollToIndex({
+            animated: true,
+            index: index,
+            viewPosition: 0.5,
+          });
+        }}
+        key={item._id}
+        title={item.name}
+        buttonStyle={[
+          styles.buttonChipTitle,
+          {
+            backgroundColor:
+              categorySelected.index === index ? Colors.red : Colors.secondary,
+          },
+        ]}
+        titleStyle={styles.chipTitle}
+      />
+    );
+  };
+
   //handle swipe to refresh
   const onRefresh = () => {
     setRefreshing(true);
@@ -150,37 +182,19 @@ const HomeScreen = ({navigation}) => {
             />
           </View>
           <Text style={[Heading, {marginTop: 30}]}>Categories</Text>
-          <ScrollView
+
+          {/* List category */}
+          <FlatList
+            snapToAlignment="center"
+            ref={listCategoryRef}
             style={styles.categoriesContainer}
-            horizontal={true}
-            showsHorizontalScrollIndicator={false}>
-            {listCategory.map((item, index) => {
-              return (
-                <Chip
-                  containerStyle={{
-                    marginHorizontal: 8,
-                  }}
-                  touchSoundDisabled={true}
-                  onPress={() => {
-                    handleSelectedCategory(index, item);
-                  }}
-                  key={item._id}
-                  title={item.name}
-                  buttonStyle={[
-                    styles.buttonChipTitle,
-                    {
-                      backgroundColor:
-                        categorySelected.index === index
-                          ? Colors.red
-                          : Colors.secondary,
-                    },
-                  ]}
-                  titleStyle={styles.chipTitle}
-                />
-              );
-            })}
-          </ScrollView>
-          {/* List film */}
+            data={listCategory}
+            keyExtractor={item => item._id}
+            horizontal
+            renderItem={renderItemCategory}
+            initialScrollIndex={0}
+            showsHorizontalScrollIndicator={false}
+          />
 
           <ScrollView showsHorizontalScrollIndicator={false} horizontal>
             {listFilmCategory.map((item, index) => {

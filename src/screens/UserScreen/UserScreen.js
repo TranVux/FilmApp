@@ -1,5 +1,6 @@
 import {
   ActivityIndicator,
+  Image,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -19,7 +20,7 @@ import {IconEditor, IconSetting} from '../../assets/svgs';
 import {Pressable} from 'react-native';
 import FastImage from 'react-native-fast-image';
 import Film from '../../components/Film';
-import {ScrollView} from 'react-native-gesture-handler';
+import {RefreshControl, ScrollView} from 'react-native-gesture-handler';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import {useDispatch, useSelector} from 'react-redux';
 import Dialog from 'react-native-dialog';
@@ -29,11 +30,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const UserScreen = ({navigation}) => {
   const isLogin = useSelector(state => state.isLogin);
+  const dispatch = useDispatch();
+  const filmHistory = useSelector(state => state.filmHistory);
   const {user_name, image, _id, email, collections} = useSelector(
     state => state.dataUser,
   );
-  const dispatch = useDispatch();
 
+  const [listFilmHistory, setFilmHistory] = React.useState([]);
+  const [isLoading, setIsLoading] = React.useState(false);
   const [uriImage, setUriImage] = React.useState('');
   const [dialogDisplay, setDialogDisplay] = React.useState(false);
   const [isUploading, setIsUploading] = React.useState(false);
@@ -129,10 +133,39 @@ const UserScreen = ({navigation}) => {
     }
   };
 
+  const handleGetFilmInHistory = async () => {
+    setIsLoading(true);
+    if (filmHistory?.length > 0) {
+      try {
+        const res = await AxiosInstance().post('/film/in-array', {
+          list_film: filmHistory,
+        });
+
+        if (!res.error) {
+          setFilmHistory(res.data);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    setIsLoading(false);
+  };
+
+  const onRefresh = () => {
+    handleGetFilmInHistory();
+  };
+
+  React.useEffect(() => {
+    handleGetFilmInHistory();
+  }, []);
+
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{flexGrow: 1, backgroundColor: Colors.primary}}>
+      contentContainerStyle={{flexGrow: 1, backgroundColor: Colors.primary}}
+      refreshControl={
+        <RefreshControl onRefresh={onRefresh} refreshing={isLoading} />
+      }>
       <SafeAreaView
         style={{
           flex: 1,
@@ -163,12 +196,12 @@ const UserScreen = ({navigation}) => {
             <>
               <View>
                 <FastImage
-                  resizeMode={FastImage.resizeMode.contain}
+                  resizeMode={FastImage.resizeMode.cover}
                   style={styles.avt}
                   source={{
                     uri: image?.path
-                      ? image?.path
-                      : 'https://images.placeholders.dev/?width=1055&height=100&text=Made%20with%20placeholders.dev&bgColor=%23f7f6f6&textColor=%236d6e71',
+                      ? image.path
+                      : 'https://firebasestorage.googleapis.com/v0/b/project1-group3-52e2e.appspot.com/o/Images%2Ffallback_image.png?alt=media&token=3cc7a438-0331-4730-95ad-5b932d86e117',
                   }}
                 />
                 <Pressable
@@ -203,7 +236,45 @@ const UserScreen = ({navigation}) => {
             </>
           )}
         </View>
+
+        {/*List History */}
+        <View>
+          <View>
+            <Text style={[Heading, {marginVertical: 15}]}>History</Text>
+            <ScrollView showsHorizontalScrollIndicator={false} horizontal>
+              {listFilmHistory?.map((item, index) => {
+                return (
+                  <Film
+                    data={item}
+                    key={item._id}
+                    style={styles.filmContainerStyle}
+                    onPress={() => {
+                      navigation.navigate('WatchFilmScreen', {
+                        data: item,
+                        episodeIndex: 0,
+                      });
+                    }}
+                  />
+                );
+              })}
+            </ScrollView>
+            {listFilmHistory?.length === 0 && !isLoading && (
+              <View style={{width: '100%'}}>
+                <Image
+                  source={require('../../assets/images/empty_search_result.png')}
+                  style={{alignSelf: 'center', width: 200, height: 200}}
+                />
+                <Text style={[Medium15, {alignSelf: 'center'}]}>
+                  Don't have anything here !! {':<'}
+                </Text>
+              </View>
+            )}
+          </View>
+        </View>
+        {/*End List History */}
       </SafeAreaView>
+
+      {/* Dialog update profile image */}
       <Dialog.Container
         useNativeDriver="true"
         onBackdropPress={() => {

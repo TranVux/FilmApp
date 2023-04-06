@@ -113,12 +113,12 @@ const LoginScreen = ({navigation}) => {
 
         <View style={styles.inputContainer}>
           <InputField
-            style={styles.inputField}
+            containerStyle={styles.inputField}
             placeholder={'Email'}
             onChangeText={handleChangeEmail}
           />
           <InputField
-            style={styles.inputField}
+            containerStyle={styles.inputField}
             placeholder={'Password'}
             securePassword
             onChangeText={handleChangePassword}
