@@ -15,6 +15,7 @@ import Film from '../../components/Film';
 import YoutubePlayer from '../../components/YoutubePlayer';
 import AxiosInstance from '../../utils/AxiosInstance';
 import {RefreshControl} from 'react-native-gesture-handler';
+import DailymotionVideoPlayer from '../../components/DailymotionVideoPlayer';
 
 const WatchFilmScreen = ({navigation, route}) => {
   const {data, episodeIndex} = route.params;
@@ -59,22 +60,29 @@ const WatchFilmScreen = ({navigation, route}) => {
 
   return (
     <SafeAreaView style={{backgroundColor: Colors.primary, flex: 1}}>
-      <YoutubePlayer
+      {/* <YoutubePlayer
         videoID={currentFilm.list_episode[currentEpisodeIndex].video_id}
-      />
-
+      /> */}
+      <View style={{width: '100%', aspectRatio: 16 / 9}}>
+        <DailymotionVideoPlayer
+          videoID={currentFilm?.list_episode[currentEpisodeIndex]?.video_id}
+        />
+      </View>
       <ScrollView
         nestedScrollEnabled={true}
         showsVerticalScrollIndicator={false}
         ref={scrollViewRef}
-        contentContainerStyle={{flexGrow: 1, backgroundColor: Colors.primary}}
+        contentContainerStyle={{
+          flexGrow: 1,
+          backgroundColor: Colors.primary,
+        }}
         refreshControl={
           <RefreshControl onRefresh={onRefresh} refreshing={refreshing} />
         }>
         <View style={styles.contentContainer}>
           <View style={{marginTop: 20}}>
             <Text style={[SubHeading]}>
-              {currentFilm?.list_episode[currentEpisodeIndex].name}
+              {currentFilm?.list_episode[currentEpisodeIndex]?.name}
             </Text>
             <View
               style={{
@@ -84,7 +92,7 @@ const WatchFilmScreen = ({navigation, route}) => {
               }}>
               <IconView />
               <Text style={[SubSmall, {marginStart: 3}]}>
-                {currentFilm.views ? data.views : '0'}
+                {currentFilm.views ? currentFilm.views : '0'}
               </Text>
             </View>
           </View>

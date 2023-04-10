@@ -607,6 +607,49 @@ export function IconEyeOff(props) {
   );
 }
 
+export function IconLikeFill(props) {
+  return (
+    <Svg
+      width={24}
+      height={24}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}>
+      <G clipPath="url(#clip0_124_39)">
+        <Path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M9.821 3.212c.296-.69 1.06-1.316 2.024-1.13 1.474.283 3.039 1.401 3.149 3.214L15 5.5V8h2.405a4 4 0 013.966 4.522l-.03.194-.91 5a4 4 0 01-3.736 3.28l-.199.004H6a3 3 0 01-2.995-2.824L3 18v-6a3 3 0 012.824-2.995L6 9h1.34l2.481-5.788z"
+          fill="#D9127E"
+        />
+      </G>
+      <Defs>
+        <ClipPath id="clip0_124_39">
+          <Path fill="#fff" d="M0 0H24V24H0z" />
+        </ClipPath>
+      </Defs>
+    </Svg>
+  );
+}
+
+export function IconHeartFill(props) {
+  return (
+    <Svg
+      width={27}
+      height={27}
+      viewBox="0 0 27 27"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}>
+      <Path
+        d="M25.313 9.914c0 7.383-10.947 13.359-11.413 13.606a.843.843 0 01-.8 0c-.466-.247-11.412-6.223-11.412-13.606a6.546 6.546 0 016.539-6.539c2.178 0 4.084.937 5.273 2.52 1.189-1.583 3.096-2.52 5.273-2.52a6.546 6.546 0 016.54 6.54z"
+        fill="#D9127E"
+      />
+    </Svg>
+  );
+}
+
 export function IconGoogle(props) {
   return (
     <Svg

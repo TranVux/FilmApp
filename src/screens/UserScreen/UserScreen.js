@@ -199,9 +199,9 @@ const UserScreen = ({navigation}) => {
                   resizeMode={FastImage.resizeMode.cover}
                   style={styles.avt}
                   source={{
-                    uri: image?.path
-                      ? image.path
-                      : 'https://firebasestorage.googleapis.com/v0/b/project1-group3-52e2e.appspot.com/o/Images%2Ffallback_image.png?alt=media&token=3cc7a438-0331-4730-95ad-5b932d86e117',
+                    uri:
+                      image?.path ??
+                      'https://firebasestorage.googleapis.com/v0/b/project1-group3-52e2e.appspot.com/o/Images%2Ffallback_image.png?alt=media&token=3cc7a438-0331-4730-95ad-5b932d86e117',
                   }}
                 />
                 <Pressable

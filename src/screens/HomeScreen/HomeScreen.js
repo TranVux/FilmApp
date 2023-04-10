@@ -12,8 +12,6 @@ import Film from '../../components/Film';
 import AxiosInstance from '../../utils/AxiosInstance';
 import {RefreshControl} from 'react-native-gesture-handler';
 
-import {useDispatch, useSelector} from 'react-redux';
-
 const HomeScreen = ({navigation}) => {
   const listCategoryRef = React.useRef();
   const [categorySelected, setCategorySelected] = React.useState({

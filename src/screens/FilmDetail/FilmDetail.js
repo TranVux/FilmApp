@@ -10,7 +10,12 @@ import React from 'react';
 import {Colors} from '../../assets/colors';
 import FastImage from 'react-native-fast-image';
 import LinearGradient from 'react-native-linear-gradient';
-import {IconBack, IconHeart, IconPlayOutlineSmall} from '../../assets/svgs';
+import {
+  IconBack,
+  IconHeart,
+  IconHeartFill,
+  IconPlayOutlineSmall,
+} from '../../assets/svgs';
 import {Heading, SubHeadingRegular, TextButton} from '../../assets/typography';
 import {Button} from '@rneui/themed';
 import YoutubePlayer from '../../components/YoutubePlayer';
@@ -23,6 +28,7 @@ import {
   setHistoryData,
 } from '../../redux/slices/filmsHistorySlice';
 import {useNavigation} from '@react-navigation/native';
+import DailymotionVideoPlayer from '../../components/DailymotionVideoPlayer';
 
 const FilmDetail = ({navigation, route}) => {
   const _navigation = useNavigation();
@@ -130,11 +136,7 @@ const FilmDetail = ({navigation, route}) => {
                 <IconBack width={27} height={27} />
               </Pressable>
               <Pressable disabled={isAdding} onPress={handleAddItemCollection}>
-                <IconHeart
-                  width={27}
-                  height={27}
-                  fillColor={hasInCollection ? Colors.red : '#fff'}
-                />
+                {hasInCollection ? <IconHeartFill /> : <IconHeart />}
               </Pressable>
             </View>
             <View
@@ -177,6 +179,7 @@ const FilmDetail = ({navigation, route}) => {
           <Text style={[Heading]}>Trailer</Text>
           {/* <VideoPlayer preview style={styles.videoPlayer} /> */}
           <YoutubePlayer preventFullScreen={true} videoID={data.trailer} />
+          {/* <DailymotionVideoPlayer /> */}
         </View>
       </View>
     </ScrollView>
