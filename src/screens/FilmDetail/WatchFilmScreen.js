@@ -4,6 +4,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  ToastAndroid,
   View,
 } from 'react-native';
 import React from 'react';
@@ -12,14 +13,20 @@ import {Heading, Medium, SubHeading, SubSmall} from '../../assets/typography';
 import {IconDownload, IconShare, IconView} from '../../assets/svgs';
 import ButtonVerticalIcon from '../../components/ButtonVerticalIcon';
 import Film from '../../components/Film';
-import YoutubePlayer from '../../components/YoutubePlayer';
 import AxiosInstance from '../../utils/AxiosInstance';
 import {RefreshControl} from 'react-native-gesture-handler';
 import DailymotionVideoPlayer from '../../components/DailymotionVideoPlayer';
+import {useDispatch, useSelector} from 'react-redux';
+import {addHistoryItem} from '../../redux/slices/filmsHistorySlice';
 
 const WatchFilmScreen = ({navigation, route}) => {
   const {data, episodeIndex} = route.params;
+
+  const dispatch = useDispatch();
+  const filmHistory = useSelector(state => state.filmHistory);
+
   const scrollViewRef = React.useRef();
+
   const [currentEpisodeIndex, setCurrentEpisodeIndex] =
     React.useState(episodeIndex);
   const [currentFilm, setCurrentFilm] = React.useState(data);
@@ -53,8 +60,56 @@ const WatchFilmScreen = ({navigation, route}) => {
     setRefreshing(false);
   };
 
+  const onFilmItemClick = item => {
+    handleSetCurrentFilm(item);
+
+    handleGetSuggestFilm();
+
+    //add film to history list
+    if (!filmHistory?.includes(item._id)) {
+      dispatch(addHistoryItem(item._id));
+    }
+
+    scrollViewRef.current?.scrollTo({
+      y: 0,
+      animated: true,
+    });
+  };
+
+  const handleChangeCurrentFilm = async _id_film => {
+    setRefreshing(true);
+    try {
+      const res = await AxiosInstance().get(`/film/${_id_film}/detail`);
+      // console.log(res);
+      if (!res.error) {
+        handleSetCurrentFilm(res.data);
+      } else {
+        console.log('Film Id invalid');
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    setRefreshing(false);
+  };
+
+  const handleSetCurrentFilm = film => {
+    setCurrentFilm(film);
+
+    //sort list episode by index properties
+    currentFilm?.list_episode?.sort(
+      (a, b) => Number(a?.index) - Number(b?.index),
+    );
+  };
+
   React.useEffect(() => {
     //handle get suggest film for user
+
+    //sort list episode by index for init film data
+    currentFilm?.list_episode?.sort(
+      (a, b) => Number(a?.index) - Number(b?.index),
+    );
+
+    console.log(currentFilm);
     handleGetSuggestFilm();
   }, []);
 
@@ -105,10 +160,24 @@ const WatchFilmScreen = ({navigation, route}) => {
               initTintColorToggle={'#fff'}
               colorToggle={Colors.red}
             />
-            <ButtonVerticalIcon title={'Download'}>
+            <ButtonVerticalIcon
+              onPress={() => {
+                ToastAndroid.show(
+                  'The function is currently in development!!',
+                  ToastAndroid.SHORT,
+                );
+              }}
+              title={'Download'}>
               <IconDownload />
             </ButtonVerticalIcon>
-            <ButtonVerticalIcon title={'Share'}>
+            <ButtonVerticalIcon
+              onPress={() => {
+                ToastAndroid.show(
+                  'The function is currently in development!!',
+                  ToastAndroid.SHORT,
+                );
+              }}
+              title={'Share'}>
               <IconShare />
             </ButtonVerticalIcon>
             <ButtonVerticalIcon
@@ -156,11 +225,18 @@ const WatchFilmScreen = ({navigation, route}) => {
                 {currentFilm?._id_collection?.films?.map(item => (
                   <Pressable
                     key={item._id}
+                    onPress={() => {
+                      if (currentFilm.name !== item.name && !refreshing) {
+                        handleChangeCurrentFilm(item._id);
+                      }
+                    }}
                     style={[
                       styles.relativeFilmItem,
                       {
                         borderColor:
-                          item.name === data.name ? 'white' : Colors.secondary,
+                          item.name === currentFilm.name
+                            ? 'white'
+                            : Colors.secondary,
                       },
                     ]}>
                     <Text style={[Medium, {fontSize: 10}]}>{item.name}</Text>
@@ -181,12 +257,7 @@ const WatchFilmScreen = ({navigation, route}) => {
                     key={item._id}
                     style={styles.filmContainerStyle}
                     onPress={() => {
-                      setCurrentFilm(item);
-                      handleGetSuggestFilm();
-                      scrollViewRef.current?.scrollTo({
-                        y: 0,
-                        animated: true,
-                      });
+                      onFilmItemClick(item);
                     }}
                   />
                 );

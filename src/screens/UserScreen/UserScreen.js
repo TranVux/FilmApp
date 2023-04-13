@@ -136,11 +136,12 @@ const UserScreen = ({navigation}) => {
   const handleGetFilmInHistory = async () => {
     setIsLoading(true);
     if (filmHistory?.length > 0) {
+      console.log(filmHistory);
       try {
         const res = await AxiosInstance().post('/film/in-array', {
           list_film: filmHistory,
         });
-
+        console.log(res);
         if (!res.error) {
           setFilmHistory(res.data);
         }
@@ -157,7 +158,7 @@ const UserScreen = ({navigation}) => {
 
   React.useEffect(() => {
     handleGetFilmInHistory();
-  }, []);
+  }, [filmHistory]);
 
   return (
     <ScrollView

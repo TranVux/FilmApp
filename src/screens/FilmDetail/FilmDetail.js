@@ -55,7 +55,7 @@ const FilmDetail = ({navigation, route}) => {
         });
         console.log(res);
         if (!res.error) {
-          if (res?.data?.collections.length > collections.length) {
+          if (res?.data?.collections.length > collections?.length) {
             setHasInCollection(true);
             ToastAndroid.show(
               'Add to collection successfully',

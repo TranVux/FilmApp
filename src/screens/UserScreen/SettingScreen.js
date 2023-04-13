@@ -25,6 +25,7 @@ import {BottomSheet} from '@rneui/themed';
 import InputField from '../../components/InputField';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {ActivityIndicator} from 'react-native';
+import {clearAllHistory} from '../../redux/slices/filmsHistorySlice';
 
 const SettingScreen = ({navigation}) => {
   const isLogin = useSelector(state => state.isLogin);
@@ -44,6 +45,7 @@ const SettingScreen = ({navigation}) => {
       await AsyncStorage.removeItem('UserData');
       dispatch(setIsLogin(false));
       dispatch(deleteDataUser({}));
+      dispatch(clearAllHistory());
     } else {
       navigation.navigate('LoginScreen');
     }

@@ -9,6 +9,11 @@ const filmsHistory = createSlice({
       state.push(actions.payload);
       AsyncStorage.setItem('FilmHistory', JSON.stringify(state));
     },
+
+    clearAllHistory: (state, actions) => {
+      state.length = 0;
+      AsyncStorage.setItem('FilmHistory', JSON.stringify([]));
+    },
   },
   extraReducers: build => {
     build.addCase(setHistoryData.pending, state => {
@@ -33,5 +38,5 @@ export const setHistoryData = createAsyncThunk(
 );
 
 const {actions, reducer} = filmsHistory;
-export const {addHistoryItem} = actions;
+export const {addHistoryItem, clearAllHistory} = actions;
 export default reducer;
