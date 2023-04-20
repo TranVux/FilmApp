@@ -6,6 +6,7 @@ import {
   Text,
   ToastAndroid,
   View,
+  BackHandler,
 } from 'react-native';
 import React from 'react';
 import {Colors} from '../../assets/colors';
@@ -26,7 +27,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {addHistoryItem} from '../../redux/slices/filmsHistorySlice';
 import {setValue} from '../../redux/slices/isValueChange';
 import {useFocusEffect} from '@react-navigation/native';
-import {BackHandler} from 'react-native';
+import {Skeleton} from '@rneui/themed';
 
 const WatchFilmScreen = ({navigation, route}) => {
   const {film_id, episodeIndex} = route.params;
@@ -44,6 +45,7 @@ const WatchFilmScreen = ({navigation, route}) => {
 
   const [listFilmSuggest, setListFilmSuggest] = React.useState([]);
   const [refreshing, setRefreshing] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(true);
 
   //handle like for film
   const [like, setLike] = React.useState({
@@ -148,6 +150,7 @@ const WatchFilmScreen = ({navigation, route}) => {
       console.log(res);
       if (!res.error) {
         setCurrentFilm(res.data);
+        setIsLoading(false);
         // console.log('get suggest film!');
         // handleGetSuggestFilm();
         //update successfully
@@ -225,9 +228,19 @@ const WatchFilmScreen = ({navigation, route}) => {
         }>
         <View style={styles.contentContainer}>
           <View style={{marginTop: 20}}>
-            <Text style={[SubHeading]}>
-              {currentFilm?.list_episode[currentEpisodeIndex]?.name}
-            </Text>
+            {!isLoading ? (
+              <Text style={[SubHeading]}>
+                {currentFilm?.list_episode[currentEpisodeIndex]?.name}
+              </Text>
+            ) : (
+              <Skeleton
+                height={25}
+                animation="none"
+                style={{
+                  backgroundColor: Colors.secondary,
+                }}
+              />
+            )}
             <View
               style={{
                 flexDirection: 'row',
@@ -289,59 +302,82 @@ const WatchFilmScreen = ({navigation, route}) => {
           {/*Episode container */}
           <View style={{marginTop: 15}}>
             <Text style={[Heading]}>Episode</Text>
-            <ScrollView
-              horizontal={true}
-              nestedScrollEnabled={true}
-              showsHorizontalScrollIndicator={false}>
-              <View style={styles.episodeContainer}>
-                {currentFilm?.list_episode?.map((item, index) => (
-                  <Pressable
-                    onPress={() => {
-                      onChangeFilmEpisode(index);
-                    }}
-                    key={item._id}
-                    style={[
-                      styles.episode,
-                      {
-                        backgroundColor: Colors.secondary,
-                        borderColor:
-                          currentEpisodeIndex === index
-                            ? 'white'
-                            : Colors.secondary,
-                      },
-                    ]}>
-                    <Text style={Medium}>{item.index}</Text>
-                  </Pressable>
-                ))}
-              </View>
-            </ScrollView>
-            <ScrollView
-              horizontal
-              nestedScrollEnabled={true}
-              showsHorizontalScrollIndicator={false}>
-              <View style={styles.relativeFilmContainer}>
-                {currentFilm?._id_collection?.films?.map(item => (
-                  <Pressable
-                    key={item._id}
-                    onPress={() => {
-                      if (currentFilm.name !== item.name && !refreshing) {
-                        handleChangeCurrentFilm(item._id);
-                      }
-                    }}
-                    style={[
-                      styles.relativeFilmItem,
-                      {
-                        borderColor:
-                          item.name === currentFilm.name
-                            ? 'white'
-                            : Colors.secondary,
-                      },
-                    ]}>
-                    <Text style={[Medium, {fontSize: 10}]}>{item.name}</Text>
-                  </Pressable>
-                ))}
-              </View>
-            </ScrollView>
+            {!isLoading ? (
+              <ScrollView
+                horizontal={true}
+                nestedScrollEnabled={true}
+                showsHorizontalScrollIndicator={false}>
+                <View style={styles.episodeContainer}>
+                  {currentFilm?.list_episode?.map((item, index) => (
+                    <Pressable
+                      onPress={() => {
+                        onChangeFilmEpisode(index);
+                      }}
+                      key={item._id}
+                      style={[
+                        styles.episode,
+                        {
+                          backgroundColor: Colors.secondary,
+                          borderColor:
+                            currentEpisodeIndex === index
+                              ? 'white'
+                              : Colors.secondary,
+                        },
+                      ]}>
+                      <Text style={Medium}>{item.index}</Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </ScrollView>
+            ) : (
+              <Skeleton
+                height={50}
+                animation="none"
+                style={{
+                  backgroundColor: Colors.secondary,
+                  marginTop: 10,
+                }}
+              />
+            )}
+            {!isLoading ? (
+              <ScrollView
+                horizontal
+                nestedScrollEnabled={true}
+                showsHorizontalScrollIndicator={false}>
+                <View style={styles.relativeFilmContainer}>
+                  {currentFilm?._id_collection?.films?.map(item => (
+                    <Pressable
+                      key={item._id}
+                      onPress={() => {
+                        if (currentFilm.name !== item.name && !refreshing) {
+                          handleChangeCurrentFilm(item._id);
+                        }
+                      }}
+                      style={[
+                        styles.relativeFilmItem,
+                        {
+                          borderColor:
+                            item.name === currentFilm.name
+                              ? 'white'
+                              : Colors.secondary,
+                        },
+                      ]}>
+                      <Text style={[Medium, {fontSize: 10}]}>{item.name}</Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </ScrollView>
+            ) : (
+              <Skeleton
+                height={20}
+                width={'50%'}
+                animation="none"
+                style={{
+                  backgroundColor: Colors.secondary,
+                  marginTop: 10,
+                }}
+              />
+            )}
           </View>
 
           {/* Suggest container */}
