@@ -25,7 +25,6 @@ import {RefreshControl} from 'react-native-gesture-handler';
 import DailymotionVideoPlayer from '../../components/DailymotionVideoPlayer';
 import {useDispatch, useSelector} from 'react-redux';
 import {addHistoryItem} from '../../redux/slices/filmsHistorySlice';
-import {setValue} from '../../redux/slices/isValueChange';
 import {useFocusEffect} from '@react-navigation/native';
 import {Skeleton} from '@rneui/themed';
 
@@ -55,6 +54,7 @@ const WatchFilmScreen = ({navigation, route}) => {
   });
   //end handle like
 
+  //handle get suggest film depend on current film category
   const handleGetSuggestFilm = async () => {
     const list_categories = currentFilm?.list_category?.map(item => {
       return item.name;
@@ -97,6 +97,7 @@ const WatchFilmScreen = ({navigation, route}) => {
     });
   };
 
+  //fetch current film from server
   const handleChangeCurrentFilm = async _id_film => {
     setRefreshing(true);
     try {
@@ -113,6 +114,8 @@ const WatchFilmScreen = ({navigation, route}) => {
     setRefreshing(false);
   };
 
+  //update current film when click item film in suggest list
+  //or load film in collection of current film
   const handleSetCurrentFilm = film => {
     //handle update like amount for film
     handleUpdateLikeAmount(like);
@@ -126,6 +129,7 @@ const WatchFilmScreen = ({navigation, route}) => {
     );
   };
 
+  //update like amount of film on server
   const handleUpdateLikeAmount = async stateLike => {
     console.log(stateLike);
     try {
@@ -143,6 +147,7 @@ const WatchFilmScreen = ({navigation, route}) => {
     }
   };
 
+  //get current film when first time navigate to the WatchFilmScreen
   const getCurrentFilm = async () => {
     try {
       console.log('get init data for film');
@@ -151,8 +156,6 @@ const WatchFilmScreen = ({navigation, route}) => {
       if (!res.error) {
         setCurrentFilm(res.data);
         setIsLoading(false);
-        // console.log('get suggest film!');
-        // handleGetSuggestFilm();
         //update successfully
       }
     } catch (error) {
@@ -185,13 +188,14 @@ const WatchFilmScreen = ({navigation, route}) => {
     getCurrentFilm();
   }, []);
 
+  //handle update like for film when button back is pressed
   useFocusEffect(
     React.useCallback(() => {
       const subscription = BackHandler.addEventListener(
         'hardwareBackPress',
         () => {
           console.log('handle on back press');
-          console.log(like);
+          // console.log(like);
           handleUpdateLikeAmount(like);
           return false;
         },
