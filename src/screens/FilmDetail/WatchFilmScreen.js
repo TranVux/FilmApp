@@ -10,7 +10,13 @@ import {
 import React from 'react';
 import {Colors} from '../../assets/colors';
 import {Heading, Medium, SubHeading, SubSmall} from '../../assets/typography';
-import {IconDownload, IconShare, IconView} from '../../assets/svgs';
+import {
+  IconDownload,
+  IconLike,
+  IconLikeFill,
+  IconShare,
+  IconView,
+} from '../../assets/svgs';
 import ButtonVerticalIcon from '../../components/ButtonVerticalIcon';
 import Film from '../../components/Film';
 import AxiosInstance from '../../utils/AxiosInstance';
@@ -18,24 +24,37 @@ import {RefreshControl} from 'react-native-gesture-handler';
 import DailymotionVideoPlayer from '../../components/DailymotionVideoPlayer';
 import {useDispatch, useSelector} from 'react-redux';
 import {addHistoryItem} from '../../redux/slices/filmsHistorySlice';
+import {setValue} from '../../redux/slices/isValueChange';
+import {useFocusEffect} from '@react-navigation/native';
+import {BackHandler} from 'react-native';
 
 const WatchFilmScreen = ({navigation, route}) => {
-  const {data, episodeIndex} = route.params;
+  const {film_id, episodeIndex} = route.params;
 
   const dispatch = useDispatch();
   const filmHistory = useSelector(state => state.filmHistory);
+  const isLogin = useSelector(state => state.isLogin);
+  const {_id} = useSelector(state => state.dataUser);
 
   const scrollViewRef = React.useRef();
 
   const [currentEpisodeIndex, setCurrentEpisodeIndex] =
     React.useState(episodeIndex);
-  const [currentFilm, setCurrentFilm] = React.useState(data);
+  const [currentFilm, setCurrentFilm] = React.useState(undefined);
 
   const [listFilmSuggest, setListFilmSuggest] = React.useState([]);
   const [refreshing, setRefreshing] = React.useState(false);
 
+  //handle like for film
+  const [like, setLike] = React.useState({
+    initStatus: currentFilm?.like?.liked.includes(_id),
+    amount: currentFilm?.like?.liked.length,
+    status: currentFilm?.like?.liked.includes(_id),
+  });
+  //end handle like
+
   const handleGetSuggestFilm = async () => {
-    const list_categories = currentFilm.list_category.map(item => {
+    const list_categories = currentFilm?.list_category?.map(item => {
       return item.name;
     });
 
@@ -63,7 +82,7 @@ const WatchFilmScreen = ({navigation, route}) => {
   const onFilmItemClick = item => {
     handleSetCurrentFilm(item);
 
-    handleGetSuggestFilm();
+    // handleGetSuggestFilm();
 
     //add film to history list
     if (!filmHistory?.includes(item._id)) {
@@ -93,6 +112,10 @@ const WatchFilmScreen = ({navigation, route}) => {
   };
 
   const handleSetCurrentFilm = film => {
+    //handle update like amount for film
+    handleUpdateLikeAmount(like);
+    //end handle update like amount for film
+
     setCurrentFilm(film);
 
     //sort list episode by index properties
@@ -100,6 +123,50 @@ const WatchFilmScreen = ({navigation, route}) => {
       (a, b) => Number(a?.index) - Number(b?.index),
     );
   };
+
+  const handleUpdateLikeAmount = async stateLike => {
+    console.log(stateLike);
+    try {
+      if (isLogin) {
+        if (stateLike.initStatus !== stateLike.status) {
+          const res = await AxiosInstance().post(
+            `/film/like/${currentFilm._id}/${_id}`,
+          );
+
+          console.log(res);
+        }
+      }
+    } catch (error) {
+      console.log('handleUpdateLikeAmount: ' + error);
+    }
+  };
+
+  const getCurrentFilm = async () => {
+    try {
+      console.log('get init data for film');
+      const res = await AxiosInstance().get(`/film/${film_id}/detail`);
+      console.log(res);
+      if (!res.error) {
+        setCurrentFilm(res.data);
+        // console.log('get suggest film!');
+        // handleGetSuggestFilm();
+        //update successfully
+      }
+    } catch (error) {
+      console.log('updateCurrentFilm: ' + error);
+    }
+  };
+
+  React.useEffect(() => {
+    //handle set new data for like state
+    setLike({
+      initStatus: currentFilm?.like?.liked.includes(_id),
+      amount: currentFilm?.like?.liked.length,
+      status: currentFilm?.like?.liked.includes(_id),
+    });
+
+    handleGetSuggestFilm();
+  }, [currentFilm]);
 
   React.useEffect(() => {
     //handle get suggest film for user
@@ -110,8 +177,26 @@ const WatchFilmScreen = ({navigation, route}) => {
     );
 
     console.log(currentFilm);
-    handleGetSuggestFilm();
+
+    //get init value for film
+    getCurrentFilm();
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const subscription = BackHandler.addEventListener(
+        'hardwareBackPress',
+        () => {
+          console.log('handle on back press');
+          console.log(like);
+          handleUpdateLikeAmount(like);
+          return false;
+        },
+      );
+
+      return () => subscription.remove();
+    }, [currentFilm, like]),
+  );
 
   return (
     <SafeAreaView style={{backgroundColor: Colors.primary, flex: 1}}>
@@ -120,7 +205,11 @@ const WatchFilmScreen = ({navigation, route}) => {
       /> */}
       <View style={{width: '100%', aspectRatio: 16 / 9}}>
         <DailymotionVideoPlayer
-          videoID={currentFilm?.list_episode[currentEpisodeIndex]?.video_id}
+          videoID={
+            currentFilm
+              ? currentFilm?.list_episode[currentEpisodeIndex]?.video_id
+              : ''
+          }
         />
       </View>
       <ScrollView
@@ -147,19 +236,26 @@ const WatchFilmScreen = ({navigation, route}) => {
               }}>
               <IconView />
               <Text style={[SubSmall, {marginStart: 3}]}>
-                {currentFilm.views ? currentFilm.views : '0'}
+                {currentFilm?.views ? currentFilm.views : '0'}
               </Text>
             </View>
           </View>
 
           {/* action container */}
           <View style={styles.actionContainer}>
-            <ButtonVerticalIcon
-              buttonLikeToggle={true}
-              title={currentFilm.like}
-              initTintColorToggle={'#fff'}
-              colorToggle={Colors.red}
-            />
+            <Pressable
+              style={{alignItems: 'center'}}
+              onPress={() => {
+                setLike(prev => ({
+                  ...prev,
+                  amount: prev.status ? prev.amount - 1 : prev.amount + 1,
+                  status: !prev.status,
+                }));
+              }}>
+              <IconLike fillColor={like.status ? Colors.red : '#fff'} />
+              <Text style={[SubSmall, {marginTop: 3}]}>{like.amount ?? 0}</Text>
+            </Pressable>
+
             <ButtonVerticalIcon
               onPress={() => {
                 ToastAndroid.show(
@@ -170,6 +266,7 @@ const WatchFilmScreen = ({navigation, route}) => {
               title={'Download'}>
               <IconDownload />
             </ButtonVerticalIcon>
+
             <ButtonVerticalIcon
               onPress={() => {
                 ToastAndroid.show(
@@ -180,6 +277,7 @@ const WatchFilmScreen = ({navigation, route}) => {
               title={'Share'}>
               <IconShare />
             </ButtonVerticalIcon>
+
             <ButtonVerticalIcon
               buttonBookmarkToggle={true}
               title="Bookmark"

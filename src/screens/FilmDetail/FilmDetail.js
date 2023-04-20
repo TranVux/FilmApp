@@ -35,6 +35,9 @@ const FilmDetail = ({navigation, route}) => {
   const {data} = route.params;
   const dispatch = useDispatch();
 
+  const isValueChange = useSelector(state => state.isValueChange);
+  const [currentFilm, setCurrentFilm] = React.useState(data);
+
   //get data from store of redux
   const filmHistory = useSelector(state => state.filmHistory);
   const {_id, user_name, image, email, collections} = useSelector(
@@ -51,7 +54,7 @@ const FilmDetail = ({navigation, route}) => {
       try {
         const res = await AxiosInstance().post('/auth/collections/add/toggle', {
           user_id: _id,
-          film_id: data?._id,
+          film_id: currentFilm?._id,
         });
         console.log(res);
         if (!res.error) {
@@ -110,7 +113,7 @@ const FilmDetail = ({navigation, route}) => {
   };
 
   React.useEffect(() => {
-    setHasInCollection(collections?.includes(data._id));
+    setHasInCollection(collections?.includes(currentFilm._id));
   }, []);
 
   return (
@@ -121,7 +124,7 @@ const FilmDetail = ({navigation, route}) => {
       <View style={{flex: 1, paddingBottom: 80}}>
         <FastImage
           source={{
-            uri: data.thumbnail.path,
+            uri: currentFilm.thumbnail.path,
           }}
           style={styles.thumbnailStyle}
           resizeMode={FastImage.resizeMode.cover}>
@@ -144,9 +147,9 @@ const FilmDetail = ({navigation, route}) => {
                 paddingHorizontal: 10,
                 justifyContent: 'space-between',
               }}>
-              <Text style={[Heading]}>{data.name}</Text>
+              <Text style={[Heading]}>{currentFilm.name}</Text>
               <Text style={[SubHeadingRegular, {color: '#FFFFFFB2'}]}>
-                {data.list_category.map((item, index, data) => {
+                {currentFilm.list_category.map((item, index, data) => {
                   if (index >= data.length - 1) return item.name;
                   return item.name.concat('/');
                 })}
@@ -154,16 +157,19 @@ const FilmDetail = ({navigation, route}) => {
               <ScrollView
                 nestedScrollEnabled={true}
                 style={{maxHeight: 170, marginTop: 10}}>
-                <Text style={[SubHeadingRegular]}>{data.synopsis}</Text>
+                <Text style={[SubHeadingRegular]}>{currentFilm.synopsis}</Text>
               </ScrollView>
             </View>
           </LinearGradient>
         </FastImage>
         <Button
           onPress={async () => {
-            navigation.navigate('WatchFilmScreen', {data, episodeIndex: 0});
-            if (!filmHistory?.includes(data._id)) {
-              dispatch(addHistoryItem(data._id));
+            navigation.navigate('WatchFilmScreen', {
+              film_id: currentFilm._id,
+              episodeIndex: 0,
+            });
+            if (!filmHistory?.includes(currentFilm._id)) {
+              dispatch(addHistoryItem(currentFilm._id));
             }
           }}
           iconPosition="left"
@@ -178,7 +184,10 @@ const FilmDetail = ({navigation, route}) => {
         <View style={{paddingHorizontal: 15, marginTop: 25, flex: 1}}>
           <Text style={[Heading]}>Trailer</Text>
           {/* <VideoPlayer preview style={styles.videoPlayer} /> */}
-          <YoutubePlayer preventFullScreen={true} videoID={data.trailer} />
+          <YoutubePlayer
+            preventFullScreen={true}
+            videoID={currentFilm.trailer}
+          />
           {/* <DailymotionVideoPlayer /> */}
         </View>
       </View>

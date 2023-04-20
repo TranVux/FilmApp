@@ -2,7 +2,7 @@ import {StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import {Pressable} from 'react-native';
 import {SubSmall} from '../assets/typography';
-import {IconBookmark, IconHeart, IconLike} from '../assets/svgs';
+import {IconBookmark, IconLike} from '../assets/svgs';
 
 const DEFAULT_FUNCTION = () => {};
 
