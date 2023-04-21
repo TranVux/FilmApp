@@ -26,6 +26,7 @@ import InputField from '../../components/InputField';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {ActivityIndicator} from 'react-native';
 import {clearAllHistory} from '../../redux/slices/filmsHistorySlice';
+import auth from '@react-native-firebase/auth';
 
 const SettingScreen = ({navigation}) => {
   const isLogin = useSelector(state => state.isLogin);
@@ -41,6 +42,14 @@ const SettingScreen = ({navigation}) => {
   const handleLoginLogout = async () => {
     if (isLogin) {
       //logout here
+      if (auth().currentUser != null) {
+        auth()
+          .signOut()
+          .then(() => {
+            console.log('google sign out successfully!');
+          });
+      }
+
       await AsyncStorage.setItem('isLogin', 'false');
       await AsyncStorage.removeItem('UserData');
       dispatch(setIsLogin(false));
@@ -139,7 +148,14 @@ const SettingScreen = ({navigation}) => {
           <Pressable
             style={styles.buttonOption}
             onPress={() => {
-              setBottomSheetVisible(true);
+              if (auth().currentUser != null) {
+                ToastAndroid.show(
+                  'You can not change password for Google Account here!',
+                  ToastAndroid.SHORT,
+                );
+              } else {
+                setBottomSheetVisible(true);
+              }
             }}>
             <View style={styles.optionLeftContainer}>
               <View style={styles.wrapperIcon}>

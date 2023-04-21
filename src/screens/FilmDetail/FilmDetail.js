@@ -23,12 +23,8 @@ import {useDispatch, useSelector} from 'react-redux';
 import AxiosInstance from '../../utils/AxiosInstance';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {setDataUser} from '../../redux/slices/dataUserSlice';
-import {
-  addHistoryItem,
-  setHistoryData,
-} from '../../redux/slices/filmsHistorySlice';
+import {addHistoryItem} from '../../redux/slices/filmsHistorySlice';
 import {useNavigation} from '@react-navigation/native';
-import DailymotionVideoPlayer from '../../components/DailymotionVideoPlayer';
 
 const FilmDetail = ({navigation, route}) => {
   const _navigation = useNavigation();
@@ -40,9 +36,7 @@ const FilmDetail = ({navigation, route}) => {
 
   //get data from store of redux
   const filmHistory = useSelector(state => state.filmHistory);
-  const {_id, user_name, image, email, collections} = useSelector(
-    state => state.dataUser,
-  );
+  const dataUser = useSelector(state => state.dataUser);
   const [hasInCollection, setHasInCollection] = React.useState(false);
   const [isAdding, setIsAdding] = React.useState(false);
 
@@ -50,15 +44,15 @@ const FilmDetail = ({navigation, route}) => {
     //disabled button hearth when request
     setIsAdding(true);
 
-    if (email) {
+    if (dataUser?.email) {
       try {
         const res = await AxiosInstance().post('/auth/collections/add/toggle', {
-          user_id: _id,
+          user_id: dataUser?._id,
           film_id: currentFilm?._id,
         });
         console.log(res);
         if (!res.error) {
-          if (res?.data?.collections.length > collections?.length) {
+          if (res?.data?.collections.length > dataUser?.collections?.length) {
             setHasInCollection(true);
             ToastAndroid.show(
               'Add to collection successfully',
@@ -76,19 +70,13 @@ const FilmDetail = ({navigation, route}) => {
           await AsyncStorage.setItem(
             'UserData',
             JSON.stringify({
-              _id,
-              user_name,
-              image,
-              email,
+              ...dataUser,
               collections: res?.data?.collections,
             }),
           );
           dispatch(
             setDataUser({
-              _id,
-              user_name,
-              image,
-              email,
+              ...dataUser,
               collections: res?.data?.collections,
             }),
           );
@@ -113,7 +101,7 @@ const FilmDetail = ({navigation, route}) => {
   };
 
   React.useEffect(() => {
-    setHasInCollection(collections?.includes(currentFilm._id));
+    setHasInCollection(dataUser?.collections?.includes(currentFilm._id));
   }, []);
 
   return (

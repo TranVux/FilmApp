@@ -32,9 +32,7 @@ const UserScreen = ({navigation}) => {
   const isLogin = useSelector(state => state.isLogin);
   const dispatch = useDispatch();
   const filmHistory = useSelector(state => state.filmHistory);
-  const {user_name, image, _id, email, collections} = useSelector(
-    state => state.dataUser,
-  );
+  const dataUser = useSelector(state => state.dataUser);
 
   const [listFilmHistory, setFilmHistory] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false);
@@ -46,7 +44,7 @@ const UserScreen = ({navigation}) => {
     setIsUploading(true);
     try {
       const formData = new FormData();
-      formData.append('user_id', _id);
+      formData.append('user_id', dataUser._id);
       formData.append('image', {
         uri: uriImage,
         type: 'image/jpeg',
@@ -60,23 +58,18 @@ const UserScreen = ({navigation}) => {
       if (!result.error) {
         console.log(result);
         let actionSetDataUser = setDataUser({
-          user_name,
-          _id,
-          email,
+          ...dataUser,
           image: result.data.image,
-          collections,
         });
         dispatch(actionSetDataUser);
         await AsyncStorage.setItem(
           'UserData',
           JSON.stringify({
-            _id,
-            user_name,
+            ...dataUser,
             image: result.data.image,
-            email,
-            collections,
           }),
         );
+
         setDialogDisplay(false);
         ToastAndroid.show(
           'Upload profile image successfully!',
@@ -136,10 +129,10 @@ const UserScreen = ({navigation}) => {
   const handleGetFilmInHistory = async () => {
     setIsLoading(true);
     if (filmHistory?.length > 0) {
-      console.log(filmHistory);
+      console.log(dataUser?.filmHistory);
       try {
         const res = await AxiosInstance().post('/film/in-array', {
-          list_film: filmHistory,
+          list_film: dataUser?.filmHistory,
         });
         console.log(res);
         if (!res.error) {
@@ -158,7 +151,7 @@ const UserScreen = ({navigation}) => {
 
   React.useEffect(() => {
     handleGetFilmInHistory();
-  }, [filmHistory]);
+  }, [dataUser?.filmHistory]);
 
   return (
     <ScrollView
@@ -201,7 +194,7 @@ const UserScreen = ({navigation}) => {
                   style={styles.avt}
                   source={{
                     uri:
-                      image?.path ??
+                      dataUser?.image?.path ??
                       'https://firebasestorage.googleapis.com/v0/b/project1-group3-52e2e.appspot.com/o/Images%2Ffallback_image.png?alt=media&token=3cc7a438-0331-4730-95ad-5b932d86e117',
                   }}
                 />
@@ -213,7 +206,9 @@ const UserScreen = ({navigation}) => {
                   <IconEditor width={15} height={15} />
                 </Pressable>
               </View>
-              <Text style={[HeadingRegular, {marginTop: 5}]}>{user_name}</Text>
+              <Text style={[HeadingRegular, {marginTop: 5}]}>
+                {dataUser?.user_name}
+              </Text>
             </>
           ) : (
             <>

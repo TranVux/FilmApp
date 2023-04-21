@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "402365685164",
+    "project_id": "animeapp-50fcd",
+    "storage_bucket": "animeapp-50fcd.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:402365685164:android:a6c74ff9ca3684a3a0ae09",
+        "android_client_info": {
+          "package_name": "com.filmapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "402365685164-633785cof6kjdb1aukh0o89vv0u4au5t.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.filmapp",
+            "certificate_hash": "8e850b8954847f662fd20f512d7d783c3991b86f"
+          }
+        },
+        {
+          "client_id": "402365685164-9mslkaln0pjv7fqpmgqjmij56vbv5ejk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAVnrgRVO3ziZ5bVttMabVerP6c5qyQuA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "402365685164-9mslkaln0pjv7fqpmgqjmij56vbv5ejk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

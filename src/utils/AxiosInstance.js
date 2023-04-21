@@ -2,7 +2,7 @@ import axios from 'axios';
 const AxiosInstance = (contentType = 'application/json') => {
   const axiosInstance = axios.create({
     // baseURL: 'https://server-film-app.vercel.app/api',
-    baseURL: 'http://192.168.1.19:3000/api',
+    baseURL: 'http://192.168.1.42:3000/api',
   });
   axiosInstance.interceptors.request.use(
     async config => {
