@@ -20,8 +20,15 @@ import {Pressable} from 'react-native';
 import {IconFacebook, IconGoogle} from '../../assets/svgs';
 import AxiosInstance from '../../utils/AxiosInstance';
 import {ToastAndroid} from 'react-native';
+import {onGoogleButtonPress} from '../../configs/firebase/authentication';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {setIsLogin} from '../../redux/slices/isLoginSlice';
+import {useDispatch} from 'react-redux';
+import {setDataUser} from '../../redux/slices/dataUserSlice';
 
 const RegisterScreen = ({navigation}) => {
+  const dispatch = useDispatch();
+
   const opacityValue = React.useRef(new Animated.Value(0)).current;
 
   const [dataRegister, setDataRegister] = React.useState({
@@ -77,7 +84,14 @@ const RegisterScreen = ({navigation}) => {
           ToastAndroid.show('Register success!', ToastAndroid.SHORT);
           navigation.navigate('LoginScreen');
         } else {
-          ToastAndroid.show('Register failure!', ToastAndroid.SHORT);
+          if (res.message) {
+            ToastAndroid.show(
+              'Register failure! '.concat(res.message),
+              ToastAndroid.SHORT,
+            );
+          } else {
+            ToastAndroid.show('Register failure!', ToastAndroid.SHORT);
+          }
         }
       } catch (e) {
         ToastAndroid.show('Please check your network!', ToastAndroid.SHORT);
@@ -87,6 +101,74 @@ const RegisterScreen = ({navigation}) => {
       ToastAndroid.show('Please fill all data!', ToastAndroid.SHORT);
     }
     handleAnimationFadeOutDialog();
+  };
+
+  const handleGoogleLogin = () => {
+    onGoogleButtonPress()
+      .then(user => {
+        console.log('Login With Google');
+        console.log(user);
+
+        //handle save data
+        // JSON.stringify({_id, user_name, image, email, collections}),
+
+        const data = {
+          _id: user.user.uid,
+          user_name: user.user.displayName,
+          image: {
+            name: `${user.user.displayName}_${new Date().getTime()}`,
+            path: user.user.photoURL,
+          },
+          email: user.user.email,
+        };
+
+        AxiosInstance()
+          .post('/auth/login?type=social', data)
+          .then(result => {
+            console.log(result);
+
+            handleSaveDataAfterLogin(result);
+          })
+          .catch(e => {
+            console.log(e);
+          });
+      })
+      .catch(e => {
+        console.log(e);
+      });
+  };
+
+  const handleSaveDataAfterLogin = async res => {
+    console.log('Login Success!');
+    const {
+      _id,
+      user_name,
+      image,
+      email,
+      collections,
+      social_id = '',
+    } = res.data;
+    ToastAndroid.show('Login Success!', ToastAndroid.SHORT);
+
+    //handle isLogin
+    dispatch(setIsLogin(true));
+    await AsyncStorage.setItem(
+      'UserData',
+      JSON.stringify({
+        _id,
+        user_name,
+        image,
+        email,
+        collections,
+        social_id,
+      }),
+    );
+    await AsyncStorage.setItem('isLogin', 'true');
+    dispatch(
+      setDataUser({_id, user_name, image, email, collections, social_id}),
+    );
+
+    navigation.navigate('BottomNavigator');
   };
 
   return (
@@ -151,6 +233,12 @@ const RegisterScreen = ({navigation}) => {
             }}>
             {/* Button facebook */}
             <Pressable
+              onPress={() => {
+                ToastAndroid.show(
+                  "Login with Facebook isn't available",
+                  ToastAndroid.SHORT,
+                );
+              }}
               style={[
                 styles.button,
                 {backgroundColor: '#fff', flex: 2, marginEnd: 20},
@@ -160,6 +248,7 @@ const RegisterScreen = ({navigation}) => {
 
             {/* Button google */}
             <Pressable
+              onPress={handleGoogleLogin}
               style={[styles.button, {backgroundColor: '#fff', flex: 2}]}>
               <IconGoogle style={styles.iconButton} />
             </Pressable>

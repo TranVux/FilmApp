@@ -91,7 +91,7 @@ const FilmDetail = ({navigation, route}) => {
       }
     } else {
       ToastAndroid.show(
-        'You must login to use this function!!',
+        'You must login to add this film to collection!!',
         ToastAndroid.SHORT,
       );
     }

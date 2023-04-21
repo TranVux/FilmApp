@@ -263,11 +263,18 @@ const WatchFilmScreen = ({navigation, route}) => {
             <Pressable
               style={{alignItems: 'center'}}
               onPress={() => {
-                setLike(prev => ({
-                  ...prev,
-                  amount: prev.status ? prev.amount - 1 : prev.amount + 1,
-                  status: !prev.status,
-                }));
+                if (isLogin) {
+                  setLike(prev => ({
+                    ...prev,
+                    amount: prev.status ? prev.amount - 1 : prev.amount + 1,
+                    status: !prev.status,
+                  }));
+                } else {
+                  ToastAndroid.show(
+                    'You must login to like this film!!!',
+                    ToastAndroid.SHORT,
+                  );
+                }
               }}>
               <IconLike fillColor={like.status ? Colors.red : '#fff'} />
               <Text style={[SubSmall, {marginTop: 3}]}>{like.amount ?? 0}</Text>

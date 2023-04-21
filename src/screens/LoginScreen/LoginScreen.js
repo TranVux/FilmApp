@@ -220,6 +220,12 @@ const LoginScreen = ({navigation}) => {
             }}>
             {/* Button facebook */}
             <Pressable
+              onPress={() => {
+                ToastAndroid.show(
+                  "Login with Facebook isn't available",
+                  ToastAndroid.SHORT,
+                );
+              }}
               style={[
                 styles.button,
                 {backgroundColor: '#fff', flex: 2, marginEnd: 20},
