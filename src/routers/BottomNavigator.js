@@ -6,6 +6,7 @@ import {Colors} from '../assets/colors';
 import {IconHeart, IconHome, IconSearch, IconUser} from '../assets/svgs';
 import HomeScreenNavigation from '../screens/HomeScreen/HomeScreenNavigation';
 import SearchNavigatorScreen from '../screens/SearchScreen/SearchScreenNavigator';
+import FavoriteScreenNavigation from '../screens/FavoriteScreen/FavoriteScreenNavigation';
 
 const BottomTab = createBottomTabNavigator();
 
@@ -50,7 +51,7 @@ const BottomNavigator = ({navigation}) => {
                   fillColor={focused ? Colors.red : '#fff'}
                 />
               );
-            case 'FavoriteScreen':
+            case 'FavoriteScreenNavigation':
               return (
                 <IconHeart
                   width={24}
@@ -77,7 +78,10 @@ const BottomNavigator = ({navigation}) => {
         component={SearchNavigatorScreen}
         name="SearchNavigatorScreen"
       />
-      <BottomTab.Screen component={FavoriteScreen} name="FavoriteScreen" />
+      <BottomTab.Screen
+        component={FavoriteScreenNavigation}
+        name="FavoriteScreenNavigation"
+      />
       <BottomTab.Screen component={UserScreen} name="UserScreen" />
     </BottomTab.Navigator>
   );

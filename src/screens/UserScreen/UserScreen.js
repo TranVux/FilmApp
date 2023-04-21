@@ -129,10 +129,10 @@ const UserScreen = ({navigation}) => {
   const handleGetFilmInHistory = async () => {
     setIsLoading(true);
     if (filmHistory?.length > 0) {
-      console.log(dataUser?.filmHistory);
+      console.log(filmHistory);
       try {
         const res = await AxiosInstance().post('/film/in-array', {
-          list_film: dataUser?.filmHistory,
+          list_film: filmHistory,
         });
         console.log(res);
         if (!res.error) {
@@ -246,7 +246,7 @@ const UserScreen = ({navigation}) => {
                     style={styles.filmContainerStyle}
                     onPress={() => {
                       navigation.navigate('WatchFilmScreen', {
-                        data: item,
+                        film_id: item._id,
                         episodeIndex: 0,
                       });
                     }}

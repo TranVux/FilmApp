@@ -94,7 +94,7 @@ const FavoriteScreen = ({navigation}) => {
                   key={item._id}
                   onPress={() => {
                     navigation.navigate('WatchFilmScreen', {
-                      data: item,
+                      film_id: item._id,
                       episodeIndex: 0,
                     });
                     if (!filmHistory?.includes(item._id)) {
@@ -129,7 +129,7 @@ const FavoriteScreen = ({navigation}) => {
                     key={item._id}
                     style={styles.filmContainerStyle}
                     onPress={() => {
-                      navigation.navigate('FilmDetail', {
+                      navigation.navigate('FilmDetailFavoriteScreen', {
                         data: item,
                         episodeIndex: 0,
                       });
