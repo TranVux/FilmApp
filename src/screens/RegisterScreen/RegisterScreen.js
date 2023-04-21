@@ -20,7 +20,10 @@ import {Pressable} from 'react-native';
 import {IconFacebook, IconGoogle} from '../../assets/svgs';
 import AxiosInstance from '../../utils/AxiosInstance';
 import {ToastAndroid} from 'react-native';
-import {onGoogleButtonPress} from '../../configs/firebase/authentication';
+import {
+  onFacebookButtonPress,
+  onGoogleButtonPress,
+} from '../../configs/firebase/authentication';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {setIsLogin} from '../../redux/slices/isLoginSlice';
 import {useDispatch} from 'react-redux';
@@ -125,7 +128,7 @@ const RegisterScreen = ({navigation}) => {
         AxiosInstance()
           .post('/auth/login?type=social', data)
           .then(result => {
-            console.log(result);
+            // console.log(result);
 
             handleSaveDataAfterLogin(result);
           })
@@ -135,6 +138,49 @@ const RegisterScreen = ({navigation}) => {
       })
       .catch(e => {
         console.log(e);
+      });
+  };
+  const handleLoginFacebook = () => {
+    onFacebookButtonPress()
+      .then(user => {
+        console.log(user);
+
+        //handle login with facebook
+        const data = {
+          _id: user.user.uid,
+          user_name: user.user.displayName,
+          image: {
+            name: `${user.user.displayName}_${new Date().getTime()}`,
+            path: user.user.photoURL,
+          },
+          email: user.user.email,
+        };
+
+        AxiosInstance()
+          .post('/auth/login?type=social', data)
+          .then(result => {
+            // console.log(result);
+
+            handleSaveDataAfterLogin(result);
+          })
+          .catch(e => {
+            console.log(e);
+          });
+      })
+      .catch(e => {
+        console.log(e.code);
+        if (e.code === error_duplicate_email) {
+          ToastAndroid.show(
+            'You has an Google account was connected with app with same email of Facebook account!! We will use Google account for this action',
+            ToastAndroid.LONG,
+          );
+          handleGoogleLogin();
+        } else {
+          ToastAndroid.show(
+            'Has error when use facebook account! Please try again!',
+            ToastAndroid.SHORT,
+          );
+        }
       });
   };
 
@@ -233,12 +279,7 @@ const RegisterScreen = ({navigation}) => {
             }}>
             {/* Button facebook */}
             <Pressable
-              onPress={() => {
-                ToastAndroid.show(
-                  "Login with Facebook isn't available",
-                  ToastAndroid.SHORT,
-                );
-              }}
+              onPress={handleLoginFacebook}
               style={[
                 styles.button,
                 {backgroundColor: '#fff', flex: 2, marginEnd: 20},
